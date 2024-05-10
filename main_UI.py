@@ -116,5 +116,13 @@ class MainWindow_UI(object):
         self.tab.addTab(self.widget_third_tab, "Второй уровень декомпозиции")
         self.tab.addTab(self.widget_forth_tab, "Третий уровень декомпозиции")
         self.tab.addTab(self.widget_fifth_tab, "Четвертый уровень декомпозиции")
+
+        # Блокировка
+        self.groupbox_cycle.setEnabled(False)
+        self.groupbox_param.setEnabled(False)
+        self.groupbox_img1.setEnabled(False)
+        self.groupbox_table1.setEnabled(False)
+
+
         MainWindow.setCentralWidget(self.tab)
         

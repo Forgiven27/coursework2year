@@ -5,6 +5,7 @@ import pyqtgraph
 
 class ThirdTabUI(object):
     def setupUi(self, QWidget):
+        QWidget.setEnabled(False)
         # Главный слой
         self.main_horlay = PySide6.QtWidgets.QHBoxLayout()
         self.tabwidget_main = PySide6.QtWidgets.QTabWidget()
@@ -12,6 +13,7 @@ class ThirdTabUI(object):
         # Табвиджет "Распределение контрольных точек по блокам"
         self.widget_tab1 = PySide6.QtWidgets.QWidget()
         self.layout_tab1 = PySide6.QtWidgets.QHBoxLayout()
+
         # Left
         self.layout_left_tab1 = PySide6.QtWidgets.QVBoxLayout()
 
@@ -24,10 +26,7 @@ class ThirdTabUI(object):
         self.listbox_cont_dots = PySide6.QtWidgets.QListWidget()
         self.button_confirm = PySide6.QtWidgets.QPushButton("Подтвердить")
 
-
-
-
-
+        self.dict_subblocks = {}
 
 
 

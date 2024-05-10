@@ -5,6 +5,7 @@ import pyqtgraph
 
 class ForthTabUI(object):
     def setupUi(self, QWidget):
+        QWidget.setEnabled(False)
         # Главный слой
         self.main_horlay = PySide6.QtWidgets.QHBoxLayout()
         self.tabwidget_main = PySide6.QtWidgets.QTabWidget()

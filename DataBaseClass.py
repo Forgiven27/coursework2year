@@ -19,10 +19,15 @@ class DataBase:
 
         return cell[0][0]
 
+    def update_cell(self, table_name, column_name, column_key, key_value, new_value):
+        self.cursor.execute(f"UPDATE {table_name} SET {column_name} = {new_value} WHERE {column_key} = {key_value}")
+        self.connection.commit()
+
     def specific_byte_cell(self):
         self.connection.text_factory = bytes
         self.cursor.execute(f"SELECT Img FROM Addition")
         cell = self.cursor.fetchall()
+        self.connection.text_factory = str
         return cell[0][0]
 
     def specific_cell(self, table_name, column_name, column_id, id):
@@ -33,6 +38,7 @@ class DataBase:
     def rows_columns(self, table_name):
         self.cursor.execute(f"SELECT * FROM {table_name}")
         a = self.cursor.fetchall()
+
         return a
 
     def columns_names(self, table_name):
@@ -46,11 +52,15 @@ class DataBase:
             #self.connection.commit()
             for i in range(len(mass)):
                 try:
+
                     beg = f"INSERT INTO {table_name}{self.columns_names(table_name)} VALUES{mass[i]}"
                     self.cursor.execute(beg)
-
                 except:
                     print(f"Строка {i} не добавлена")
+                    print("Name table - ", table_name)
+                    print("Names of table - ", self.columns_names(table_name))
+                    print("Value - ", mass[i])
+
                 else:
                     print(f"Строка {i} добавлена")
             self.connection.commit()
