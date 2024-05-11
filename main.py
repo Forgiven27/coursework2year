@@ -39,12 +39,21 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         for i in self.tab2.dict_chb_graph.keys():
             i.setChecked(True)
-            i.toggled.connect(self.check_box_connect)
-        self.tab2.button_phase_clean.clicked.connect(self.clean_widget)
+            i.toggled.connect(self.check_box_connect_tab2)
+        self.tab2.button_phase_clean.clicked.connect(self.clean_widget_tab2)
         for i in self.tab2.dict_chb_graph_func.keys():
             i.setChecked(True)
-            i.toggled.connect(self.check_box_connect_func)
-        self.tab2.button_func_clean.clicked.connect(self.clean_widget_func)
+            i.toggled.connect(self.check_box_connect_func_tab2)
+        self.tab2.button_func_clean.clicked.connect(self.clean_widget_func_tab2)
+
+        for i in self.tab3.dict_chb_graph.keys():
+            i.setChecked(True)
+            i.toggled.connect(self.check_box_connect_tab3)
+        self.tab3.button_phase_clean.clicked.connect(self.clean_widget_tab3)
+        for i in self.tab3.dict_chb_graph_func.keys():
+            i.setChecked(True)
+            i.toggled.connect(self.check_box_connect_func_tab3)
+        self.tab3.button_func_clean.clicked.connect(self.clean_widget_func_tab3)
 
         self.path = None
         self.my_table = None
@@ -62,6 +71,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         self.ui.table_1.verticalHeader().hide()
         self.ui.table_1.setColumnWidth(0, 50)
+
+
 
 
 
@@ -85,25 +96,54 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             msgbox.setText("Рекомендуется перейти на следующий уровень")
             msgbox.exec()
 
-    def check_box_connect(self, checked):
+    def check_box_connect_tab2(self, checked):
         checkbox = self.sender()
+
         plot_widget = self.tab2.dict_chb_graph[checkbox]
         plot_widget[0].setVisible(checked)
         plot_widget[1].setVisible(checked)
         for text in plot_widget[2]:
             text.setVisible(checked)
-    def check_box_connect_func(self, checked):
+
+    def check_box_connect_tab3(self, checked):
+        checkbox = self.sender()
+        plot_widget = self.tab3.dict_chb_graph[checkbox]
+        plot_widget[0].setVisible(checked)
+        plot_widget[1].setVisible(checked)
+        for text in plot_widget[2]:
+            text.setVisible(checked)
+
+
+    def check_box_connect_func_tab2(self,checked):
         checkbox = self.sender()
         plot_widget = self.tab2.dict_chb_graph_func[checkbox]
         plot_widget[0].setVisible(checked)
         plot_widget[1].setVisible(checked)
         for text in plot_widget[2]:
             text.setVisible(checked)
-    def clean_widget(self):
+
+    def check_box_connect_func_tab3(self, checked):
+        checkbox = self.sender()
+        plot_widget = self.tab3.dict_chb_graph_func[checkbox]
+        plot_widget[0].setVisible(checked)
+        plot_widget[1].setVisible(checked)
+        for text in plot_widget[2]:
+            text.setVisible(checked)
+
+    def clean_widget_tab2(self):
         for i in self.tab2.dict_chb_graph.keys():
             i.setChecked(False)
-    def clean_widget_func(self):
+
+    def clean_widget_func_tab2(self):
         for i in self.tab2.dict_chb_graph_func.keys():
+            i.setChecked(False)
+
+    def clean_widget_tab3(self):
+        for i in self.tab3.dict_chb_graph.keys():
+            i.setChecked(False)
+
+    def clean_widget_func_tab3(self):
+        for i in self.tab3.dict_chb_graph_func.keys():
             i.setChecked(False)
 
     def open_help_window(self):
@@ -647,8 +687,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             self.fill_table_monit(self.tab3.table_phase_coor, self.tab3.table_monit)
             # self.clear_all_graph(self.tab2)
 
-            # self.graph_ph(self.tab2.table_phase_coor, self.tab2)
-            # self.graph_func(self.tab2.table_phase_coor, self.tab2)
+            self.graph_ph(self.tab3.table_phase_coor, self.tab3)
+            self.graph_func(self.tab3.table_phase_coor, self.tab3)
 
     def massive_from_dots(self, massive_headers):
         massive = self.compess_table()

@@ -89,17 +89,32 @@ class ThirdTabUI(object):
         # Табвиджет виджет "Фазовые траектории"
         # <График альфа
         self.graph_phase = graph_phase = pyqtgraph.PlotWidget()
-        self.graph_phase_neg = graph_phase.plot(name="\u03B1(\u03BC)-")
-        self.graph_phase_neg.setData([0, 1, 2, 3, 4, 5, 6, 7], [2, 3, 2, 3, 4, 2, 4, 2],
-                                     pen=pyqtgraph.mkPen(color=(255, 0, 0)))
+        self.graph_phase.addLegend()
 
-        self.graph_phase_neu = graph_phase.plot(name="\u03B1(\u03BC)")
-        self.graph_phase_neu.setData([0, 1, 2, 3, 4, 5, 6, 7], [1, 5, 3, 3, 4, 3, 5, 1],
-                                     pen=pyqtgraph.mkPen(color=(0, 255, 0)))
+        self.graph_phase.setLabel("left", "\u03B1", **{'color': '#EEE', 'font-size': '14pt'})
+        self.graph_phase.setLabel("bottom", "\u03BC", **{'color': '#EEE', 'font-size': '14pt'})
+
+        self.scatter_pos = pyqtgraph.ScatterPlotItem(symbol='o', brush='g', size=10)  # Красные точки
+        self.graph_phase.addItem(self.scatter_pos)
+        self.scatter_ = pyqtgraph.ScatterPlotItem(symbol='o', brush='y', size=10)  # Желтые точки
+        self.graph_phase.addItem(self.scatter_)
+        self.scatter_neg = pyqtgraph.ScatterPlotItem(symbol='o', brush='b', size=10)  # Красные точки
+        self.graph_phase.addItem(self.scatter_neg)
 
         self.graph_phase_pos = graph_phase.plot(name="\u03B1(\u03BC)+")
-        self.graph_phase_pos.setData([0, 1, 2, 3, 4, 5, 6, 7], [3, 2, 1, 3, 2, 1, 3, 2],
-                                     pen=pyqtgraph.mkPen(color=(0, 0, 255)))
+        self.graph_phase_neu = graph_phase.plot(name="\u03B1(\u03BC)")
+        self.graph_phase_neg = graph_phase.plot(name="\u03B1(\u03BC)-")
+
+        self.scatter_pos_forecast = pyqtgraph.ScatterPlotItem(symbol='o', brush='b', size=10)
+        self.graph_phase.addItem(self.scatter_pos_forecast)
+        self.scatter_forecast = pyqtgraph.ScatterPlotItem(symbol='o', brush='r', size=10)
+        self.graph_phase.addItem(self.scatter_forecast)
+        self.scatter_neg_forecast = pyqtgraph.ScatterPlotItem(symbol='o', brush='w', size=10)
+        self.graph_phase.addItem(self.scatter_neg_forecast)
+
+        self.graph_phase_pos_forecast = graph_phase.plot(name="\u03B1(\u03BC)+")
+        self.graph_phase_neu_forecast = graph_phase.plot(name="\u03B1(\u03BC)")
+        self.graph_phase_neg_forecast = graph_phase.plot(name="\u03B1(\u03BC)-")
 
         # <Гроупбокс "Параметры графиков"
         self.groupbox_phase_param = PySide6.QtWidgets.QGroupBox("Параметры графиков")
@@ -129,20 +144,45 @@ class ThirdTabUI(object):
         self.widget_phase.setLayout(self.layout_vert_phase)
         self.tabwidget_inserted.addTab(self.widget_phase, "Фазовые траектории \u03B1(\u03BC)")
 
+        self.dict_chb_graph = {self.checkbox_phase_param_00: [self.graph_phase_neg, self.scatter_neg],
+                               self.checkbox_phase_param_10: [self.graph_phase_neu, self.scatter_],
+                               self.checkbox_phase_param_20: [self.graph_phase_pos, self.scatter_pos],
+                               self.checkbox_phase_param_01: [self.graph_phase_neg_forecast, self.scatter_neg_forecast],
+                               self.checkbox_phase_param_11: [self.graph_phase_neu_forecast, self.scatter_forecast],
+                               self.checkbox_phase_param_21: [self.graph_phase_pos_forecast, self.scatter_pos_forecast]
+                               }
+
         # Табвиджет виджет "Функция"
         # <График ню
         self.graph_func = graph_func = pyqtgraph.PlotWidget()
         self.graph_func_neg = graph_func.plot(name="\u03BC(t)-")
-        self.graph_func_neg.setData([0, 1, 2, 3, 4, 5, 6, 7], [2, 3, 2, 3, 4, 2, 4, 2],
-                                    pen=pyqtgraph.mkPen(color=(255, 0, 0)))
-
         self.graph_func_neu = graph_func.plot(name="\u03BC(t)")
-        self.graph_func_neu.setData([0, 1, 2, 3, 4, 5, 6, 7], [1, 5, 3, 3, 4, 3, 5, 1],
-                                    pen=pyqtgraph.mkPen(color=(0, 255, 0)))
-
         self.graph_func_pos = graph_func.plot(name="\u03BC(t)+")
-        self.graph_func_pos.setData([0, 1, 2, 3, 4, 5, 6, 7], [3, 2, 1, 3, 2, 1, 3, 2],
-                                    pen=pyqtgraph.mkPen(color=(0, 0, 255)))
+
+        self.graph_func.setLabel("left", "\u03BC", **{'color': '#EEE', 'font-size': '14pt'})
+        self.graph_func.setLabel("bottom", "Цикл наблюдения (t)", **{'color': '#EEE', 'font-size': '10pt'})
+
+        self.scatter_func_pos = pyqtgraph.ScatterPlotItem(symbol='o', brush='g', size=10)  # Красные точки
+        self.graph_func.addItem(self.scatter_func_pos)
+        self.scatter_func_ = pyqtgraph.ScatterPlotItem(symbol='o', brush='y', size=10)  # Желтые точки
+        self.graph_func.addItem(self.scatter_func_)
+        self.scatter_func_neg = pyqtgraph.ScatterPlotItem(symbol='o', brush='b', size=10)  # Красные точки
+        self.graph_func.addItem(self.scatter_func_neg)
+
+        self.graph_func_pos = graph_func.plot(name="\u03B1(\u03BC)+")
+        self.graph_func_neu = graph_func.plot(name="\u03B1(\u03BC)")
+        self.graph_func_neg = graph_func.plot(name="\u03B1(\u03BC)-")
+
+        self.scatter_func_pos_forecast = pyqtgraph.ScatterPlotItem(symbol='o', brush='b', size=10)
+        self.graph_func.addItem(self.scatter_func_pos_forecast)
+        self.scatter_func_forecast = pyqtgraph.ScatterPlotItem(symbol='o', brush='r', size=10)
+        self.graph_func.addItem(self.scatter_func_forecast)
+        self.scatter_func_neg_forecast = pyqtgraph.ScatterPlotItem(symbol='o', brush='w', size=10)
+        self.graph_func.addItem(self.scatter_func_neg_forecast)
+
+        self.graph_func_pos_forecast = graph_func.plot(name="\u03B1(\u03BC)+")
+        self.graph_func_neu_forecast = graph_func.plot(name="\u03B1(\u03BC)")
+        self.graph_func_neg_forecast = graph_func.plot(name="\u03B1(\u03BC)-")
 
         # <Гроупбокс "Параметры графиков"
         self.groupbox_func_param = PySide6.QtWidgets.QGroupBox("Параметры графиков")
@@ -153,6 +193,18 @@ class ThirdTabUI(object):
         self.checkbox_func_param_20 = PySide6.QtWidgets.QCheckBox("\u03BC(t)+")
         self.checkbox_func_param_21 = PySide6.QtWidgets.QCheckBox("Прогноз \u03BC(t)+")
         self.button_func_clean = PySide6.QtWidgets.QPushButton("Убрать всё")
+
+        self.dict_chb_graph_func = {self.checkbox_func_param_00: [self.graph_func_neg, self.scatter_func_neg],
+                                    self.checkbox_func_param_10: [self.graph_func_neu, self.scatter_func_],
+                                    self.checkbox_func_param_20: [self.graph_func_pos, self.scatter_func_pos],
+                                    self.checkbox_func_param_01: [self.graph_func_neg_forecast,
+                                                                  self.scatter_func_neg_forecast],
+                                    self.checkbox_func_param_11: [self.graph_func_neu_forecast,
+                                                                  self.scatter_func_forecast],
+                                    self.checkbox_func_param_21: [self.graph_func_pos_forecast,
+                                                                  self.scatter_func_pos_forecast]
+                                    }
+
 
         self.layout_grid_func = PySide6.QtWidgets.QGridLayout()
         self.layout_grid_func.addWidget(self.checkbox_func_param_00, 0, 0)
