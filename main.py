@@ -1050,16 +1050,29 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def fill_tab5(self):
         massive = self.compess_table()
-
+        x = []
+        for i in range(len(massive)-1):
+            x.append(massive[i+1][0])
         for i in range(len(massive[0])-1):
             chb_item = PySide6.QtWidgets.QCheckBox(str(massive[0][i+1]))
             list_item = PySide6.QtWidgets.QListWidgetItem()
             self.tab5.listbox_all_dots.addItem(list_item)
             self.tab5.listbox_all_dots.setItemWidget(list_item, chb_item)
-            self.tab5.dict_chb_graph[chb_item] = self.tab5.graph_phase.plotItem(name=str(massive[0][i+1]))
+            y = []
+            for j in range(len(massive)-1):
+                y.append(massive[j+1][i+1])
+            print(x, y, sep="\n")
+            plot = self.tab5.main_plot.plot(x, y)
+            plot.setVisible(False)
+            self.tab5.dict_chb_graph[chb_item] = plot
 
-        print(self.tab5.dict_chb_graph)
+        for checkbox in self.tab5.dict_chb_graph.keys():
+            checkbox.stateChanged.connect(self.update_plots)
 
+    def update_plots(self):
+        for checkbox, plot in self.tab5.dict_chb_graph.items():
+            plot.setVisible(checkbox.isChecked())
+            print(checkbox.isChecked())
 
 
 if __name__ == "__main__":

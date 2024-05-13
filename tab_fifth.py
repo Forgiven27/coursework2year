@@ -26,6 +26,7 @@ class FifthTabUI(object):
 
         # Right
         self.graph_phase = pyqtgraph.PlotWidget()
+        self.main_plot = self.graph_phase.getPlotItem()
         self.graph_phase.addLegend()
 
         self.graph_phase.setLabel("left", "Z", **{'color': '#EEE', 'font-size': '14pt'})

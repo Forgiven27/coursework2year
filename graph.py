@@ -24,7 +24,7 @@ class Graph(object):
             text = pyqtgraph.TextItem(text=str(i), anchor=(0.5, 0.5))
             text.setPos(x_val+0.5, y_val)
             text.setFont(font)
-            text.setColor((255,255,255,70))
+            text.setColor((255, 255, 255, 70))
             plotWid.addItem(text)
             items_text.append(text)
 
