@@ -1,8 +1,7 @@
 import PySide6
 from PySide6 import QtWidgets
-import pyqtgraph as pg
+import pyqtgraph
 import numpy as np
-from scipy.interpolate import interp1d
 import graph
 
 def moving_average(data, window_size):
@@ -13,43 +12,30 @@ class FifthTabUI(object):
         # Главный слой
         self.main_horlay = PySide6.QtWidgets.QHBoxLayout()
 
-        subblock_combo = PySide6.QtWidgets.QComboBox()
-        subblock_combo.addItems(["Subblock 1", "Subblock 2", "Subblock 3"])
+        self.dict_chb_graph = {}
 
-        # Создаем два QListWidget
-        listbox_all_points = PySide6.QtWidgets.QListWidget()  # Список всех точек
-        listbox_subblock_points = PySide6.QtWidgets.QListWidget()  # Список точек выбранного подблока
+        # Left
+        self.listbox_all_dots = PySide6.QtWidgets.QListWidget()
+        self.button_confirm = PySide6.QtWidgets.QPushButton("Подтвердить")
+        self.button_clear = PySide6.QtWidgets.QPushButton("Сбросить всё")
 
-        # Заполняем первый QListWidget
-        for i in range(10):
-            listbox_all_points.addItem(f"Point {i}")
+        self.layout_left = PySide6.QtWidgets.QVBoxLayout()
+        self.layout_left.addWidget(self.listbox_all_dots)
+        self.layout_left.addWidget(self.button_confirm)
+        self.layout_left.addWidget(self.button_clear)
 
-        # Функция для перемещения элементов из одного QListWidget в другой
-        def move_point():
-            # Получаем выделенный элемент из первого QListWidget
-            selected_items = listbox_all_points.selectedItems()
+        # Right
+        self.graph_phase = pyqtgraph.PlotWidget()
+        self.graph_phase.addLegend()
 
-            if selected_items:
-                # Берем первый выделенный элемент
-                item_to_move = selected_items[0]
+        self.graph_phase.setLabel("left", "Z", **{'color': '#EEE', 'font-size': '14pt'})
+        self.graph_phase.setLabel("bottom", "Цикл наблюдения (t)", **{'color': '#EEE', 'font-size': '14pt'})
 
-                # Добавляем его во второй QListWidget
-                listbox_subblock_points.addItem(item_to_move.text())
+        self.layout_right = PySide6.QtWidgets.QVBoxLayout()
+        self.layout_right.addWidget(self.graph_phase)
 
-                # Удаляем его из первого QListWidget
-                listbox_all_points.takeItem(listbox_all_points.row(item_to_move))
-
-        # Кнопка для перемещения точки из первого во второй
-        move_button = PySide6.QtWidgets.QPushButton("Move Point")
-        move_button.clicked.connect(move_point)  # Перемещаем точку по нажатию кнопки
-
-        # Добавляем виджет выбора подблока и listbox'ы в компоновку
-        self.main_horlay.addWidget(subblock_combo)
-        self.main_horlay.addWidget(listbox_all_points)
-        self.main_horlay.addWidget(move_button)
-        self.main_horlay.addWidget(listbox_subblock_points)
-
-
-
+        # Компановка
+        self.main_horlay.addLayout(self.layout_left,1)
+        self.main_horlay.addLayout(self.layout_right,3)
 
         QWidget.setLayout(self.main_horlay)

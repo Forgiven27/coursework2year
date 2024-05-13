@@ -26,9 +26,16 @@ class ThirdTabUI(object):
         self.listbox_cont_dots = PySide6.QtWidgets.QListWidget()
         self.button_confirm = PySide6.QtWidgets.QPushButton("Подтвердить")
 
+        self.label_count_blocks = PySide6.QtWidgets.QLabel("Количество блоков")
+        self.spinbox_count_blocks = PySide6.QtWidgets.QSpinBox()
+        self.spinbox_count_blocks.setMinimum(2)
+        self.spinbox_count_blocks.setMaximum(26)
+
         self.dict_subblocks = {}
 
-
+        self.layout_spinbox = PySide6.QtWidgets.QHBoxLayout()
+        self.layout_spinbox.addWidget(self.label_count_blocks)
+        self.layout_spinbox.addWidget(self.spinbox_count_blocks)
 
         self.layout_top = PySide6.QtWidgets.QVBoxLayout()
         self.layout_top.addWidget(self.label_choose_1)
@@ -48,6 +55,7 @@ class ThirdTabUI(object):
         self.layout_bottom = PySide6.QtWidgets.QHBoxLayout()
         self.layout_bottom.addWidget(self.button_confirm)
 
+        self.layout_left_tab1.addLayout(self.layout_spinbox)
         self.layout_left_tab1.addLayout(self.layout_top)
         self.layout_left_tab1.addLayout(self.layout_center)
         self.layout_left_tab1.addLayout(self.layout_bottom)

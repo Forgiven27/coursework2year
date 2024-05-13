@@ -45,6 +45,7 @@ class MainWindow_UI(object):
         self.lineEdit_exp = PySide6.QtWidgets.QLineEdit()
         self.lineEdit_error = PySide6.QtWidgets.QLineEdit()
 
+
         self.layout_first_row = PySide6.QtWidgets.QHBoxLayout()
         self.layout_second_row = PySide6.QtWidgets.QHBoxLayout()
 

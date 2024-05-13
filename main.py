@@ -14,6 +14,7 @@ from tab_third import ThirdTabUI
 from tab_forth import ForthTabUI
 from tab_fifth import FifthTabUI
 
+
 class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
     def __init__(self):
         super(MainApp, self).__init__()
@@ -55,36 +56,77 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             i.toggled.connect(self.check_box_connect_func_tab3)
         self.tab3.button_func_clean.clicked.connect(self.clean_widget_func_tab3)
 
+        for i in self.tab4.dict_chb_graph.keys():
+            i.setChecked(True)
+            i.toggled.connect(self.check_box_connect_tab4)
+        self.tab4.button_phase_clean.clicked.connect(self.clean_widget_tab4)
+        for i in self.tab4.dict_chb_graph_func.keys():
+            i.setChecked(True)
+            i.toggled.connect(self.check_box_connect_func_tab4)
+        self.tab4.button_func_clean.clicked.connect(self.clean_widget_func_tab4)
+
+
+
         self.path = None
         self.my_table = None
         self.row_buffer = 0
-
+        self.blocks = []
+        self.first_fill_blocks()
         self.ui.button_del_cycle.clicked.connect(self.row_delete)
         self.ui.button_add_cycle.clicked.connect(self.row_add)
         self.ui.button_confirm.clicked.connect(self.button_param_confirm)
 
         self.tab2.button_recom.clicked.connect(self.rec_box)
-        self.tab2.button_next_dec.clicked.connect(self.open_third_tab)
+        self.tab2.button_next_dec.clicked.connect(self.open_next_tab)
         # self.tab2.button_recom.clicked.connect(lambda :self.clear_all_graph(self.tab2))
 
+        self.tab3.spinbox_count_blocks.textChanged.connect(self.fill_blocks)
         self.tab3.button_confirm.clicked.connect(self.tab3_button_confirm)
+        self.tab3.button_next_dec.clicked.connect(self.open_next_tab)
+
+        self.tab4.button_tab10_confirm.clicked.connect(self.tab3_button_confirm)
+        self.tab4.button_tab20_confirm.clicked.connect(self.button_confirm_20_tab4)
 
         self.ui.table_1.verticalHeader().hide()
         self.ui.table_1.setColumnWidth(0, 50)
 
-
-
-
-
-
     def test_functions(self):
         pass
 
+    def fill_blocks(self):
+        alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                    'U', 'V', 'W', 'X', 'Y', 'Z']
+        self.blocks.clear()
+        for i in range(int(self.tab3.spinbox_count_blocks.text())):
+            self.blocks.append(alphabet[i])
+        self.tab3.widget_tab2.setEnabled(False)
+        self.tab4.widget_tab1.setEnabled(False)
+        self.tab4.widget_tab2.setEnabled(False)
+        self.tab4.groupbox_settings.setEnabled(False)
+        self.tab4.groupbox_tab1_center.setEnabled(False)
+        self.update_tab3_zerotab()
+
+    def first_fill_blocks(self):
+        alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
+                    'U', 'V', 'W', 'X', 'Y', 'Z']
+        self.blocks.clear()
+        for i in range(int(self.tab3.spinbox_count_blocks.text())):
+            self.blocks.append(alphabet[i])
+        self.tab3.listbox_all_dots.itemClicked.connect(self.move_dot_in)
+        self.tab3.listbox_cont_dots.itemClicked.connect(self.move_dot_out)
+        self.tab3.combobox_choose.currentTextChanged.connect(self.subblocks_switch)
+        self.tab4.listbox_unselected_dots.itemClicked.connect(self.move_dot_in_tab4)
+        self.tab4.listbox_selected_dots.itemClicked.connect(self.move_dot_out_tab4)
+        self.tab4.combobox_block.currentTextChanged.connect(self.subblocks_switch_tab4)
+        self.tab4.button_tab11_confirm.clicked.connect(self.button_confirm_settings_tab4)
+        self.tab4.combobox_subblock.currentTextChanged.connect(self.subblocks_switch_tab4_sub)
+        self.tab4.listbox_available_dots.itemClicked.connect(self.move_dot_in_tab4_sub)
+        self.tab4.listbox_subblock_dots.itemClicked.connect(self.move_dot_out_tab4_sub)
 
     def rec_box(self):
         count = 0
-        for i in range (self.tab2.table_monit.rowCount()):
-            if self.tab2.table_monit.item(i,3).text().rfind("Не"):
+        for i in range(self.tab2.table_monit.rowCount()):
+            if self.tab2.table_monit.item(i, 3).text().rfind("Не"):
                 count += 1
 
         if count > self.tab2.table_monit.rowCount() * 0.75 or count < self.tab2.table_monit.rowCount() * 0.2:
@@ -113,8 +155,15 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         for text in plot_widget[2]:
             text.setVisible(checked)
 
+    def check_box_connect_tab4(self, checked):
+        checkbox = self.sender()
+        plot_widget = self.tab4.dict_chb_graph[checkbox]
+        plot_widget[0].setVisible(checked)
+        plot_widget[1].setVisible(checked)
+        for text in plot_widget[2]:
+            text.setVisible(checked)
 
-    def check_box_connect_func_tab2(self,checked):
+    def check_box_connect_func_tab2(self, checked):
         checkbox = self.sender()
         plot_widget = self.tab2.dict_chb_graph_func[checkbox]
         plot_widget[0].setVisible(checked)
@@ -125,6 +174,14 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
     def check_box_connect_func_tab3(self, checked):
         checkbox = self.sender()
         plot_widget = self.tab3.dict_chb_graph_func[checkbox]
+        plot_widget[0].setVisible(checked)
+        plot_widget[1].setVisible(checked)
+        for text in plot_widget[2]:
+            text.setVisible(checked)
+
+    def check_box_connect_func_tab4(self, checked):
+        checkbox = self.sender()
+        plot_widget = self.tab4.dict_chb_graph_func[checkbox]
         plot_widget[0].setVisible(checked)
         plot_widget[1].setVisible(checked)
         for text in plot_widget[2]:
@@ -144,6 +201,14 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def clean_widget_func_tab3(self):
         for i in self.tab3.dict_chb_graph_func.keys():
+            i.setChecked(False)
+
+    def clean_widget_tab4(self):
+        for i in self.tab4.dict_chb_graph.keys():
+            i.setChecked(False)
+
+    def clean_widget_func_tab4(self):
+        for i in self.tab4.dict_chb_graph_func.keys():
             i.setChecked(False)
 
     def open_help_window(self):
@@ -166,7 +231,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             rows.append(tuple(mass))
         return rows
 
-    def show_file_dialog(self): # Открытие диалогового окна для выбора таблицы
+    def show_file_dialog(self):  # Открытие диалогового окна для выбора таблицы
         self.ui.combobox_choose_db.clear()
         text, ok = PySide6.QtWidgets.QFileDialog.getOpenFileName(self, 'Выбор базы данных')
         if ok:
@@ -174,12 +239,12 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             self.path = list_comb[-1]
             self.fill_combobox()
 
-    def fill_combobox(self): # Заполенение комбобокса именами таблиц БД
+    def fill_combobox(self):  # Заполенение комбобокса именами таблиц БД
         self.my_table = DataBaseClass.DataBase(self.path)
         for i in self.my_table.table_names():
             self.ui.combobox_choose_db.addItem(str(i)[2:-3])
 
-    def row_delete(self): # удаление выделенной строки
+    def row_delete(self):  # удаление выделенной строки
         self.buffer_updater()
         row_index = self.ui.table_1.currentRow()
         if row_index >= 0:
@@ -187,7 +252,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             self.ui.table_1.selectionModel().clearCurrentIndex()
         self.table_trans_updater()
         self.update_tab2()
-
 
     def row_add_summ(self):
         value = self.row_buffer+1
@@ -281,7 +345,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
             self.ui.table_1.setColumnCount(count_of_columns)
             self.ui.table_1.setRowCount(count_of_rows)
-            #self.ui.table_1.setHorizontalHeaderItem(0, PySide6.QtWidgets.QTableWidgetItem('Эпоха'))
 
             vert_head_massive = []
             for i in content_of_table:
@@ -308,6 +371,16 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             self.ui.table_1.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
 
     def update_tab2(self):
+        self.ui.widget_third_tab.setEnabled(False)
+        self.ui.widget_forth_tab.setEnabled(False)
+        self.tab3.widget_tab2.setEnabled(False)
+        self.tab4.widget_tab1.setEnabled(False)
+        self.tab4.widget_tab2.setEnabled(False)
+        self.tab4.groupbox_settings.setEnabled(False)
+        self.tab4.groupbox_tab1_center.setEnabled(False)
+
+        self.fill_tab5()
+
         self.table_phase_headers(self.tab2.table_phase_coor, self.compess_table())
         self.table_monit_headers(self.tab2.table_monit, self.compess_table())
         self.fill_mu_a(self.compess_table(), self.tab2.table_phase_coor)
@@ -316,6 +389,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         self.graph_ph(self.tab2.table_phase_coor, self.tab2)
         self.graph_func(self.tab2.table_phase_coor, self.tab2)
+
 
     def clear_all_graph(self, tab_widget):
         self.clear_text_items(tab_widget.graph_phase)
@@ -386,13 +460,12 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         mu_a = [[], []]
         sum_mu = 0
 
-
         for i in range(len(massive)-1):
             for j in range(len(massive[0])-1):
                 sum_mu += math.pow(massive[i+1][j+1], 2)
             mu_a[0].append(math.sqrt(sum_mu))
         sum_a = 0
-        a = 0
+
         for i in range(len(massive)-2):
             for j in range(len(massive[0])-1):
                 sum_a += (massive[i+1][j+1] * massive[i+2][j+1])
@@ -401,6 +474,11 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         return mu_a
 
     def fill_mu_a(self, massive, table):
+        for row in range(table.rowCount()):
+            for col in range(table.columnCount()-1):
+                table.setItem(row, col+1, PySide6.QtWidgets.QTableWidgetItem(""))
+
+
         massive_plus = copy.deepcopy(massive)
         massive_minus = copy.deepcopy(massive)
         e1 = 0.0005
@@ -501,10 +579,10 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         for i in range(row_count):
             if L[i] <= R[i]:
                 table_monit.setItem(i, 3, PySide6.QtWidgets.QTableWidgetItem(str("Неаварийное")))
-                table_monit.item(i, 3).setBackground(QtGui.QColor(0,255,0))
+                table_monit.item(i, 3).setBackground(QtGui.QColor(0, 255, 0))
             else:
                 table_monit.setItem(i, 3, PySide6.QtWidgets.QTableWidgetItem(str("Аварийное")))
-                table_monit.item(i, 3).setBackground(QtGui.QColor(255,0,0,80))
+                table_monit.item(i, 3).setBackground(QtGui.QColor(255, 0, 0, 80))
 
 
     def graph_ph(self, data_table, tab_widget):
@@ -610,30 +688,76 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             idx = list(tab_widget.dict_chb_graph_func.keys()).index(key)
             value.append(texts[idx])
 
-    def open_third_tab(self):
-        self.ui.tab.setCurrentIndex(2)
-        self.ui.widget_third_tab.setEnabled(True)
-        self.update_tab3_zerotab(self.compess_table())
+    def open_next_tab(self):
+        index = self.ui.tab.currentIndex()
+        self.ui.tab.setCurrentIndex(index + 1)
+        if index == 1:
+            self.ui.widget_third_tab.setEnabled(True)
+            self.tab3.tabwidget_main.setCurrentIndex(0)
+            self.update_tab3_zerotab()
+        elif index == 2:
+            self.ui.widget_forth_tab.setEnabled(True)
+            self.tab4.widget_tab1.setEnabled(True)
+            self.tab4.tabwidget_main.setCurrentIndex(0)
+            self.update_tab4_zerotab()
 
-    def update_tab3_zerotab(self, massive):
-        subblocks = ["A", "B", "C"]
-        for i in subblocks:
+    def update_tab4_zerotab(self):
+        self.tab4.combobox_block.clear()
+
+        self.tab4.dict_subblocks.clear()
+        self.tab4.dict_subblocks = copy.deepcopy(self.tab3.dict_subblocks)
+
+        for i in self.tab4.dict_subblocks.keys():
+            self.tab4.combobox_block.addItem(str(i))
+        try:
+            self.tab4.listbox_unselected_dots.clear()
+            self.tab4.listbox_selected_dots.clear()
+        except:
+            print("листбоксы пусты")
+        for i in range(self.tab3.listbox_all_dots.count()):
+            item = self.tab3.listbox_all_dots.item(i)
+            self.tab4.listbox_unselected_dots.addItem(item.text())
+        if self.tab4.combobox_block.currentText() is not None and self.tab4.combobox_block.currentText() != '':
+            for i in self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()]:
+                self.tab4.listbox_selected_dots.addItem(str(i))
+
+        # self.tab4.listbox_unselected_dots.itemClicked.connect(self.move_dot_in_tab4)
+        # self.tab4.listbox_selected_dots.itemClicked.connect(self.move_dot_out_tab4)
+        # self.tab4.combobox_block.currentTextChanged.connect(self.subblocks_switch_tab4)
+
+
+
+
+
+    def update_tab3_zerotab(self):
+
+        self.tab3.combobox_choose.clear()
+        self.tab3.dict_subblocks.clear()
+
+        for i in self.blocks:
             self.tab3.dict_subblocks[i] = []
             self.tab3.combobox_choose.addItem(str(i))
 
+        massive = self.compess_table()
+        self.tab3.listbox_all_dots.clear()
         for i in range(len(massive[0])-1):
             self.tab3.listbox_all_dots.addItem(str(massive[0][i+1]))
 
-        self.tab3.listbox_all_dots.itemClicked.connect(self.move_dot_in)
-        self.tab3.listbox_cont_dots.itemClicked.connect(self.move_dot_out)
-        self.tab3.combobox_choose.currentTextChanged.connect(self.subblocks_switch)
+        if self.tab3.listbox_cont_dots.count() != 0:
+            self.tab3.listbox_cont_dots.clear()
+        # self.tab3.listbox_all_dots.itemClicked.connect(self.move_dot_in)
+        # self.tab3.listbox_cont_dots.itemClicked.connect(self.move_dot_out)
+        # self.tab3.combobox_choose.currentTextChanged.connect(self.subblocks_switch)
 
     def move_dot_in(self):
+
         item = self.tab3.listbox_all_dots.currentItem()
         dot = item.text()
         self.tab3.listbox_all_dots.takeItem(self.tab3.listbox_all_dots.row(item))
         self.tab3.listbox_cont_dots.addItem(dot)
         self.tab3.dict_subblocks[self.tab3.combobox_choose.currentText()].append(dot)
+
+
 
     def move_dot_out(self):
         item = self.tab3.listbox_cont_dots.currentItem()
@@ -643,14 +767,88 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.tab3.dict_subblocks[self.tab3.combobox_choose.currentText()].remove(dot)
 
     def subblocks_switch(self):
-        self.tab3.listbox_cont_dots.clear()
-        for i in self.tab3.dict_subblocks[self.tab3.combobox_choose.currentText()]:
-            self.tab3.listbox_cont_dots.addItem(i)
+        if self.tab3.combobox_choose.currentText() != '':
+            self.tab3.listbox_cont_dots.clear()
+            for i in self.tab3.dict_subblocks[self.tab3.combobox_choose.currentText()]:
+                self.tab3.listbox_cont_dots.addItem(i)
 
-    def tab3_button_confirm(self):
+    def move_dot_in_tab4(self):
+        item = self.tab4.listbox_unselected_dots.currentItem()
+        dot = item.text()
+        self.tab4.listbox_unselected_dots.takeItem(self.tab4.listbox_unselected_dots.row(item))
+        self.tab4.listbox_selected_dots.addItem(dot)
+        self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()].append(dot)
+
+    def move_dot_out_tab4(self):
+        item = self.tab4.listbox_selected_dots.currentItem()
+        dot = item.text()
+        self.tab4.listbox_selected_dots.takeItem(self.tab4.listbox_selected_dots.row(item))
+        self.tab4.listbox_unselected_dots.addItem(dot)
+        self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()].remove(dot)
+
+    def subblocks_switch_tab4(self):
+        if self.tab4.combobox_block.currentText() is not None and self.tab4.combobox_block.currentText() != '':
+            self.tab4.listbox_selected_dots.clear()
+            for i in self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()]:
+                self.tab4.listbox_selected_dots.addItem(i)
+
+    def button_confirm_settings_tab4(self):
+        if self.tab4.lineedit_count_cont_dots.text() != '' and int(self.tab4.lineedit_count_cont_dots.text()) > 1:
+            self.tab4.groupbox_tab1_center.setEnabled(True)
+            self.tab4.dict_subblocks_sub.clear()
+
+
+            self.tab4.combobox_subblock.clear()
+            for i in range(int(self.tab4.spinbox_count_subblock.text())):
+                self.tab4.combobox_subblock.addItem(str(i + 1))
+                self.tab4.dict_subblocks_sub[str(i+1)] = []
+            print(self.tab4.dict_subblocks_sub)
+            self.tab4.listbox_available_dots.clear()
+
+            for i in range(self.tab4.listbox_selected_dots.count()):
+                item = self.tab4.listbox_selected_dots.item(i).text()
+                self.tab4.listbox_available_dots.addItem(item)
+
+        else:
+            msg_box = PySide6.QtWidgets.QMessageBox()
+            msg_box.setIcon(PySide6.QtWidgets.QMessageBox.Critical)
+            msg_box.setWindowTitle("Ошибка")
+            msg_box.setText("Некорректное значение количества точек в подблоке.")
+            msg_box.setInformativeText(
+                "Для исправления ошибки измените количества точек.")
+            msg_box.setStandardButtons(PySide6.QtWidgets.QMessageBox.Ok)
+            msg_box.exec()
+
+    def move_dot_in_tab4_sub(self):
+        item = self.tab4.listbox_available_dots.currentItem()
+        dot = item.text()
+        self.tab4.listbox_available_dots.takeItem(self.tab4.listbox_available_dots.row(item))
+        self.tab4.listbox_subblock_dots.addItem(dot)
+        self.tab4.dict_subblocks_sub[self.tab4.combobox_subblock.currentText()].append(dot)
+
+    def move_dot_out_tab4_sub(self):
+        item = self.tab4.listbox_subblock_dots.currentItem()
+        dot = item.text()
+        self.tab4.listbox_subblock_dots.takeItem(self.tab4.listbox_subblock_dots.row(item))
+        self.tab4.listbox_available_dots.addItem(dot)
+        self.tab4.dict_subblocks_sub[self.tab4.combobox_subblock.currentText()].remove(dot)
+
+    def subblocks_switch_tab4_sub(self):
+        try:
+            if self.tab4.combobox_subblock.currentText() is not None and self.tab4.combobox_subblock.currentText() != '':
+                self.tab4.listbox_subblock_dots.clear()
+
+                for i in self.tab4.dict_subblocks_sub[self.tab4.combobox_subblock.currentText()]:
+                    self.tab4.listbox_subblock_dots.addItem(i)
+        except:
+            a = 1
+
+
+    def button_confirm_20_tab4(self):
         mass = []
-        for i in self.tab3.dict_subblocks.keys():
-            mass.append(len(self.tab3.dict_subblocks[i]))
+
+        for i in self.tab4.dict_subblocks_sub.keys():
+            mass.append(len(self.tab4.dict_subblocks_sub[i]))
         a = mass[0]
         flag = True
         for i in range(len(mass)-1):
@@ -666,20 +864,165 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                 msg_box.exec()
                 break
         if flag:
-            self.tab3.tabwidget_main.setCurrentIndex(1)
-            self.tab3.combobox_choose_2.clear()  # Сначала очищаем второй QComboBox
-            # Копируем все элементы из первого QComboBox во второй
-            for index in range(self.tab3.combobox_choose.count()):
-                item_text = self.tab3.combobox_choose.itemText(index)
-                self.tab3.combobox_choose_2.addItem(item_text)
-            self.update_tab3_onetab()
-            self.tab3.combobox_choose_2.currentTextChanged.connect(self.update_tab3_onetab)
+            self.tab4.tabwidget_main.setCurrentIndex(1)
+            self.tab4.widget_tab2.setEnabled(True)
+            self.tab4.combobox_choose_2.clear()
+            for index in range(self.tab4.combobox_subblock.count()):
+                item_text = self.tab4.combobox_subblock.itemText(index)
+                self.tab4.combobox_choose_2.addItem(item_text)
+            self.update_tab4_onetab()
+            self.tab4.combobox_choose_2.currentTextChanged.connect(self.update_tab4_onetab)
+
+    def update_tab4_onetab(self):
+        if self.tab4.combobox_choose_2.currentText() is not None and self.tab4.combobox_choose_2.currentText() != '':
+            massive = self.massive_from_dots(self.tab4.dict_subblocks_sub[self.tab4.combobox_choose_2.currentText()])
+
+            self.table_phase_headers(self.tab4.table_phase_coor, massive)
+            self.table_monit_headers(self.tab4.table_monit, massive)
+            self.fill_mu_a(massive, self.tab4.table_phase_coor)
+            self.fill_table_monit(self.tab4.table_phase_coor, self.tab4.table_monit)
+            # self.clear_all_graph(self.tab2)
+
+            self.graph_ph(self.tab4.table_phase_coor, self.tab4)
+            self.graph_func(self.tab4.table_phase_coor, self.tab4)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+    def tab3_button_confirm(self):
+        mass = []
+        if self.ui.tab.currentIndex() == 2:
+            for i in self.tab3.dict_subblocks.keys():
+                mass.append(len(self.tab3.dict_subblocks[i]))
+            a = mass[0]
+            flag = True
+            for i in range(len(mass)-1):
+                if a != mass[i+1] or a < 2:
+                    flag = False
+                    msg_box = PySide6.QtWidgets.QMessageBox()
+                    msg_box.setIcon(PySide6.QtWidgets.QMessageBox.Critical)
+                    msg_box.setWindowTitle("Ошибка")
+                    msg_box.setText("Количество точек в подблоках разное.")
+                    msg_box.setInformativeText(
+                        "Для исправления ошибки измените количества точек.")
+                    msg_box.setStandardButtons(PySide6.QtWidgets.QMessageBox.Ok)
+                    msg_box.exec()
+                    break
+            if flag:
+                self.tab3.tabwidget_main.setCurrentIndex(1)
+                self.tab3.widget_tab2.setEnabled(True)
+                self.tab3.combobox_choose_2.clear()
+                for index in range(self.tab3.combobox_choose.count()):
+                    item_text = self.tab3.combobox_choose.itemText(index)
+                    self.tab3.combobox_choose_2.addItem(item_text)
+                self.update_tab3_onetab()
+                self.tab3.combobox_choose_2.currentTextChanged.connect(self.update_tab3_onetab)
+        elif self.ui.tab.currentIndex() == 3:
+
+            for i in self.tab4.dict_subblocks.keys():
+                mass.append(len(self.tab4.dict_subblocks[i]))
+            a = mass[0]
+            flag = True
+            for i in range(len(mass) - 1):
+                if a != mass[i + 1] or a < 2:
+                    flag = False
+                    msg_box = PySide6.QtWidgets.QMessageBox()
+                    msg_box.setIcon(PySide6.QtWidgets.QMessageBox.Critical)
+                    msg_box.setWindowTitle("Ошибка")
+                    msg_box.setText("Количество точек в подблоках разное.")
+                    msg_box.setInformativeText(
+                        "Для исправления ошибки измените количества точек.")
+                    msg_box.setStandardButtons(PySide6.QtWidgets.QMessageBox.Ok)
+                    msg_box.exec()
+                    break
+            if flag:
+                self.tab4.groupbox_settings.setEnabled(True)
+                self.fill_tab4_table()
+
+
+    def fill_tab4_table(self):
+
+        dots = len(self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()])
+        columns = (dots*(dots-1))/2
+        self.tab4.table1_tab1.setColumnCount(columns + 1)
+        self.tab4.table1_tab1.setRowCount(self.ui.table_1.rowCount())
+        self.tab4.table1_tab1.verticalHeader().hide()
+
+        self.tab4.table2_tab1.setColumnCount(self.tab4.table1_tab1.columnCount())
+        self.tab4.table2_tab1.setRowCount(self.tab4.table1_tab1.rowCount())
+        self.tab4.table2_tab1.verticalHeader().hide()
+
+        massive = self.massive_from_dots(self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()])
+
+        for i in range(len(massive)-1):
+            self.tab4.table1_tab1.setItem(i,0,PySide6.QtWidgets.QTableWidgetItem(str(int(massive[i+1][0]))))
+            self.tab4.table2_tab1.setItem(i, 0, PySide6.QtWidgets.QTableWidgetItem(str(int(massive[i + 1][0]))))
+        self.tab4.table1_tab1.setHorizontalHeaderItem(0,PySide6.QtWidgets.QTableWidgetItem(massive[0][0]))
+        self.tab4.table2_tab1.setHorizontalHeaderItem(0, PySide6.QtWidgets.QTableWidgetItem(massive[0][0]))
+
+        breker = 0
+        col_name = []
+        for el_mass in range(len(massive[0]) - 1):
+            contr_cell = massive[0][el_mass + 1]
+            breker += 1
+            for n in range(len(massive[0]) - breker - 1):
+                print(massive[0][el_mass + 1], massive[0][el_mass + 1 + n + 1])
+                cell = contr_cell + " - " + massive[0][el_mass + 1 + n + 1]
+                col_name.append(cell)
+
+        for i in range(self.tab4.table1_tab1.columnCount()-1):
+            self.tab4.table1_tab1.setHorizontalHeaderItem(i + 1, PySide6.QtWidgets.QTableWidgetItem(col_name[i]))
+            self.tab4.table2_tab1.setHorizontalHeaderItem(i + 1, PySide6.QtWidgets.QTableWidgetItem(col_name[i]))
+
+        for row in range(len(massive)-1):
+            breker = 0
+            cell_mass = []
+            for el_mass in range(len(massive[0])-1):
+                contr_cell = massive[row+1][el_mass+1]
+                breker += 1
+
+                for n in range(len(massive[row])-breker-1):
+                    print(massive[0][el_mass+1], massive[0][el_mass+1 + n+1])
+                    cell = round(math.fabs(contr_cell - massive[row+1][el_mass+1 + n+1]),4)
+                    cell_mass.append(cell)
+
+            for col in range(self.tab4.table1_tab1.columnCount()-1):
+                self.tab4.table1_tab1.setItem(row, col + 1, PySide6.QtWidgets.QTableWidgetItem(str(cell_mass[col])))
+
+        full_green = 0
+        E = self.my_table.specific_zero_cell("Addition", "E")
+        print("E = ", E)
+        rows = self.tab4.table2_tab1.rowCount()
+        for col in range(self.tab4.table2_tab1.columnCount() - 1):
+            cell_zero = float(self.tab4.table1_tab1.item(0, col + 1).text())
+            cell_green = 0
+            for row in range(self.tab4.table2_tab1.rowCount()):
+                cell_current = float(self.tab4.table1_tab1.item(row, col + 1).text())
+                cell_diff = round(math.fabs(cell_zero - cell_current), 4)
+                self.tab4.table2_tab1.setItem(row, col + 1, PySide6.QtWidgets.QTableWidgetItem(str(cell_diff)))
+
+                if cell_diff <= E:
+                    self.tab4.table2_tab1.item(row, col+1).setBackground(QtGui.QColor(0, 255, 0))
+                    cell_green += 1
+                else:
+                    self.tab4.table2_tab1.item(row, col+1).setBackground(QtGui.QColor(255, 0, 0, 80))
+            if cell_green == rows:
+                full_green += 1
+
+        print("Полностью зеленые связи", full_green)
 
     def update_tab3_onetab(self):
-        if self.tab3.combobox_choose_2.currentText() is not None:
+        if self.tab3.combobox_choose_2.currentText() is not None and self.tab3.combobox_choose_2.currentText() != '':
             massive = self.massive_from_dots(self.tab3.dict_subblocks[self.tab3.combobox_choose_2.currentText()])
             self.table_phase_headers(self.tab3.table_phase_coor, massive)
             self.table_monit_headers(self.tab3.table_monit, massive)
@@ -705,8 +1048,18 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                 massive_return[i].append(massive[i][idx[j]])
         return massive_return
 
-    def fill_block(self):
-        pass
+    def fill_tab5(self):
+        massive = self.compess_table()
+
+        for i in range(len(massive[0])-1):
+            chb_item = PySide6.QtWidgets.QCheckBox(str(massive[0][i+1]))
+            list_item = PySide6.QtWidgets.QListWidgetItem()
+            self.tab5.listbox_all_dots.addItem(list_item)
+            self.tab5.listbox_all_dots.setItemWidget(list_item, chb_item)
+            self.tab5.dict_chb_graph[chb_item] = self.tab5.graph_phase.plotItem(name=str(massive[0][i+1]))
+
+        print(self.tab5.dict_chb_graph)
+
 
 
 if __name__ == "__main__":

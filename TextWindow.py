@@ -14,13 +14,9 @@ class HelpWindow(PySide6.QtWidgets.QMainWindow):
         self.text_edit.setReadOnly(True)
         help_text = """
                 <h1>Руководство к использованию программы</h1>
-                <p>This is the help information for the application.ммммммммммммммммммммммммммммм
-                мммммммммммммммммммммммммммммммммммммммммммммммммммммммм
-                ммммммммммммммммммммммммммммммммммммммммммммммммм
-                ммммммммммммммммммммммммммммммммммммммммммммммммм
-                мммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм</p>
-                <p>Use the navigation buttons to move around.</p>
-                <p><a href="https://example.com">Visit our website</a> for more information.</p>
+                <p>В этом окне будут инструкции по использованию данного приложения.</p>
+                <p>Используйте интуицию для навигации.</p>
+                <p><a href="https://primer.com">Посетите наш сайт приложений</a> для дополнительной информации.</p>
                 """
 
         self.text_edit.setHtml(help_text)
