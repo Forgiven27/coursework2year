@@ -108,6 +108,7 @@ class MainWindow_UI(object):
         self.widget_third_tab = PySide6.QtWidgets.QWidget()
         self.widget_forth_tab = PySide6.QtWidgets.QWidget()
         self.widget_fifth_tab = PySide6.QtWidgets.QWidget()
+        self.widget_sixth_tab = PySide6.QtWidgets.QWidget()
         self.widget_first_tab.setLayout(self.layout_data_tab)
 
         # Создание и заполнение TabWidget
@@ -117,6 +118,7 @@ class MainWindow_UI(object):
         self.tab.addTab(self.widget_third_tab, "Второй уровень декомпозиции")
         self.tab.addTab(self.widget_forth_tab, "Третий уровень декомпозиции")
         self.tab.addTab(self.widget_fifth_tab, "Четвертый уровень декомпозиции")
+        self.tab.addTab(self.widget_sixth_tab, "Тестирование")
 
         # Блокировка
         self.groupbox_cycle.setEnabled(False)

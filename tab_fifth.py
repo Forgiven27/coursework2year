@@ -4,8 +4,7 @@ import pyqtgraph
 import numpy as np
 import graph
 
-def moving_average(data, window_size):
-    return np.convolve(data, np.ones(window_size), 'valid') / window_size
+
 class FifthTabUI(object):
     def setupUi(self, QWidget):
         #QWidget.setEnabled(False)
