@@ -464,18 +464,22 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def mu_a(self, massive):
         mu_a = [[], []]
-        sum_mu = 0
+        # sum_mu = 0
 
         for i in range(len(massive)-1):
+            sum_mu = 0
             for j in range(len(massive[1])-1):
-                sum_mu += math.pow(massive[i+1][j+1], 2)
+                sum_mu += (massive[i+1][j+1])**2
+            print("мю", sum_mu**0.5)
             mu_a[0].append(math.sqrt(sum_mu))
         sum_a = 0
 
         for i in range(len(massive)-2):
             for j in range(len(massive[1])-1):
                 sum_a += (massive[i+1][j+1] * massive[i+2][j+1])
+            print("ню", sum_a / (mu_a[0][i] * mu_a[0][i + 1]))
             a = math.acos(sum_a / (mu_a[0][i] * mu_a[0][i+1]))
+
             mu_a[1].append(a)
         return mu_a
 
@@ -1110,17 +1114,62 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             self.tab6.table_rest.setItem(row, 0, PySide6.QtWidgets.QTableWidgetItem(str(int(massive_main[row+1][0]))))
             for col in range(len(massive_main[0]) - 1):
                 self.tab6.table_rest.setItem(row, col+1, PySide6.QtWidgets.QTableWidgetItem(str(massive_main[1][col+1])))
-
-        # massive_rest = self.compess_table(self.tab6.table_rest)
-
-
+        #
+        # massive_rest = []
+        # headers_rest = []
+        # for i in range(self.tab6.table_rest.columnCount()-4):
+        #     headers_rest.append(self.tab6.table_rest.horizontalHeaderItem(i).text())
+        # massive_rest.append(headers_rest)
+        #
+        # for i in range(self.tab6.table_rest.rowCount()):
+        #     row = []
+        #     row.clear()
+        #     for j in range(self.tab6.table_rest.columnCount()-4):
+        #         row.append(float(self.tab6.table_rest.item(i, j).text()))
+        #     massive_rest.append(row)
+        #
         # mu_a = self.mu_a(massive_rest)
-
-
-
-
-
-
+        # print(len(mu_a[1]))
+        # print(self.tab6.table_rest.rowCount())
+        # # С шумом
+        # for i in range(self.tab6.table_rest.rowCount()):
+        #     self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 4,
+        #                                  PySide6.QtWidgets.QTableWidgetItem(str(mu_a[0][i])))
+        # self.tab6.table_rest.setItem(0, self.tab6.table_rest.columnCount() - 3,
+        #                              PySide6.QtWidgets.QTableWidgetItem(str(0)))
+        #
+        # for i in range(self.tab6.table_rest.rowCount()-1):
+        #     self.tab6.table_rest.setItem(i+1, self.tab6.table_rest.columnCount() - 3,
+        #                                  PySide6.QtWidgets.QTableWidgetItem(str(mu_a[1][i])))
+        # self.tab6.table_rest.resizeColumnToContents(self.tab6.table_rest.columnCount() - 3)
+        #
+        # # Без шума
+        # self.tab6.table_rest.setItem(0, self.tab6.table_rest.columnCount() - 2,
+        #                              PySide6.QtWidgets.QTableWidgetItem(str(0)))
+        #
+        # for i in range(self.tab6.table_rest.rowCount()-1):
+        #     self.tab6.table_rest.setItem(i+1, self.tab6.table_rest.columnCount() - 2,
+        #                                  PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 7))))
+        #
+        # # Оценка
+        # E_const = float(self.my_table.specific_zero_cell("Addition", "E"))
+        # evaluation = []
+        # for i in range(self.tab6.table_rest.rowCount()):
+        #     cell_standart = float(self.tab6.table_rest.item(i, 1).text())
+        #     cell = float(self.tab6.table_rest.item(i, 1).text())
+        #     delta = math.fabs(cell - cell_standart)
+        #     evaluation.append(delta)
+        #
+        # for i in range(self.tab6.table_rest.rowCount()):
+        #     if evaluation[i] <= E_const:
+        #         self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 1,
+        #                                      PySide6.QtWidgets.QTableWidgetItem(str("+")))
+        #         self.tab6.table_rest.item(i, self.tab6.table_rest.columnCount() - 1).setBackground(QtGui.QColor(0, 255, 0))
+        #     else:
+        #         self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 1,
+        #                                      PySide6.QtWidgets.QTableWidgetItem(str("-")))
+        #         self.tab6.table_rest.item(i, self.tab6.table_rest.columnCount() - 1).setBackground(
+        #             QtGui.QColor(255, 0, 0))
 
 
 if __name__ == "__main__":
