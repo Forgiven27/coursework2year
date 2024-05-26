@@ -15,12 +15,13 @@ class FifthTabUI(object):
 
         # Left
         self.listbox_all_dots = PySide6.QtWidgets.QListWidget()
-        self.button_confirm = PySide6.QtWidgets.QPushButton("Подтвердить")
+        # self.button_confirm = PySide6.QtWidgets.QPushButton("Подтвердить")
         self.button_clear = PySide6.QtWidgets.QPushButton("Сбросить всё")
+        self.button_clear.clicked.connect(self.checkbox_off)
 
         self.layout_left = PySide6.QtWidgets.QVBoxLayout()
         self.layout_left.addWidget(self.listbox_all_dots)
-        self.layout_left.addWidget(self.button_confirm)
+        # self.layout_left.addWidget(self.button_confirm)
         self.layout_left.addWidget(self.button_clear)
 
         # Right
@@ -39,3 +40,8 @@ class FifthTabUI(object):
         self.main_horlay.addLayout(self.layout_right,3)
 
         QWidget.setLayout(self.main_horlay)
+
+    def checkbox_off(self):
+        for i in self.dict_chb_graph.keys():
+            if i.isChecked():
+                i.setChecked(False)

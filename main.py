@@ -1,6 +1,7 @@
+import decimal
 import PySide6
-from PySide6 import QtWidgets, QtGui, QtCore
 import pyqtgraph
+from PySide6 import QtWidgets, QtGui
 import sys
 import math
 import copy
@@ -14,6 +15,7 @@ from tab_third import ThirdTabUI
 from tab_forth import ForthTabUI
 from tab_fifth import FifthTabUI
 from tab_sixth import SixthTabUI
+
 
 class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
     def __init__(self):
@@ -97,7 +99,27 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def test_functions(self):
         pass
+    def checkbox_on(self):
+        for i in self.tab2.dict_chb_graph.keys():
+            if not i.isChecked():
+                i.setChecked(True)
+        for i in self.tab2.dict_chb_graph_func.keys():
+            if not i.isChecked():
+                i.setChecked(True)
 
+        for i in self.tab3.dict_chb_graph.keys():
+            if not i.isChecked():
+                i.setChecked(True)
+        for i in self.tab3.dict_chb_graph_func.keys():
+            if not i.isChecked():
+                i.setChecked(True)
+
+        for i in self.tab4.dict_chb_graph.keys():
+            if not i.isChecked():
+                i.setChecked(True)
+        for i in self.tab4.dict_chb_graph_func.keys():
+            if not i.isChecked():
+                i.setChecked(True)
     def fill_blocks(self):
         alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T',
                     'U', 'V', 'W', 'X', 'Y', 'Z']
@@ -127,9 +149,11 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.tab4.combobox_subblock.currentTextChanged.connect(self.subblocks_switch_tab4_sub)
         self.tab4.listbox_available_dots.itemClicked.connect(self.move_dot_in_tab4_sub)
         self.tab4.listbox_subblock_dots.itemClicked.connect(self.move_dot_out_tab4_sub)
+        self.tab4.button_next_dec.clicked.connect(self.open_next_tab)
 
     def rec_box(self, table):
         count = 0
+
         for i in range(table.rowCount()):
             if table.item(i, 3).text().rfind("Не"):
                 count += 1
@@ -151,6 +175,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         plot_widget[1].setVisible(checked)
         for text in plot_widget[2]:
             text.setVisible(checked)
+        self.tab2.graph_phase.autoRange()
 
     def check_box_connect_tab3(self, checked):
         checkbox = self.sender()
@@ -301,8 +326,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             for s in self.my_table.table_names():
                 a = s[0]
                 if (s[0].lower()).find("add") != -1:
-                    self.ui.lineEdit_error.setText(str(self.my_table.specific_zero_cell(a, "E")))
-                    self.ui.lineEdit_exp.setText(str(self.my_table.specific_zero_cell(a, "A")))
+                    self.ui.lineEdit_error.setText(str(decimal.Decimal(str(self.my_table.specific_zero_cell(a, "E")))))
+                    self.ui.lineEdit_exp.setText(str(decimal.Decimal(str(self.my_table.specific_zero_cell(a, "A")))))
 
                     msgbox = PySide6.QtWidgets.QMessageBox()
                     msgbox.setText("Параметры добавлены")
@@ -386,15 +411,23 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         self.fill_tab5()
         self.fill_rest_tab6()
+        self.fill_table_uni_tab6()
+
+        self.fill_table_leap_tab6()
+
+        self.fill_tab6_graph()
 
         self.table_phase_headers(self.tab2.table_phase_coor, self.compess_table(self.ui.table_1))
         self.table_monit_headers(self.tab2.table_monit, self.compess_table(self.ui.table_1))
         self.fill_mu_a(self.compess_table(self.ui.table_1), self.tab2.table_phase_coor)
         self.fill_table_monit(self.tab2.table_phase_coor, self.tab2.table_monit)
         #self.clear_all_graph(self.tab2)
-
+        for item in self.tab2.graph_phase.items():
+            if isinstance(item, pyqtgraph.TextItem):
+                self.tab2.graph_phase.removeItem(item)
         self.graph_ph(self.tab2.table_phase_coor, self.tab2)
         self.graph_func(self.tab2.table_phase_coor, self.tab2)
+        self.checkbox_on()
 
 
     def clear_all_graph(self, tab_widget):
@@ -405,7 +438,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         # print(type(plot_widget.getPlotItem().items()))
         a = plot_widget.getPlotItem()
         v = type(a.items())
-        print(v)
+        # print(v)
         # for item in plot_widget.getPlotItem().items():
         #     if isinstance(item, pyqtgraph.TextItem):
         #         items_to_remove.append(item)
@@ -464,23 +497,26 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def mu_a(self, massive):
         mu_a = [[], []]
-        # sum_mu = 0
-
         for i in range(len(massive)-1):
-            sum_mu = 0
+            sum_mu = decimal.Decimal(str("0"))
             for j in range(len(massive[1])-1):
-                sum_mu += (massive[i+1][j+1])**2
-            print("мю", sum_mu**0.5)
+                sum_mu += decimal.Decimal(massive[i+1][j+1])**2
             mu_a[0].append(math.sqrt(sum_mu))
-        sum_a = 0
 
         for i in range(len(massive)-2):
+            sum_a = decimal.Decimal(str("0"))
             for j in range(len(massive[1])-1):
-                sum_a += (massive[i+1][j+1] * massive[i+2][j+1])
-            print("ню", sum_a / (mu_a[0][i] * mu_a[0][i + 1]))
-            a = math.acos(sum_a / (mu_a[0][i] * mu_a[0][i+1]))
+                sum_a += (decimal.Decimal(str(massive[i+1][j+1])) * decimal.Decimal(str(massive[i+2][j+1])))
 
-            mu_a[1].append(a)
+            divided = sum_a / (decimal.Decimal(str(mu_a[0][i])) * decimal.Decimal(str(mu_a[0][i+1])))
+
+            if divided < 1:
+                b = decimal.Decimal(
+                    str(math.acos(sum_a / (decimal.Decimal(str(mu_a[0][i])) * decimal.Decimal(str(mu_a[0][i + 1]))))))
+                mu_a[1].append(b)
+            else:
+                b = 0
+                mu_a[1].append(b)
         return mu_a
 
     def fill_mu_a(self, massive, table):
@@ -488,52 +524,56 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             for col in range(table.columnCount()-1):
                 table.setItem(row, col+1, PySide6.QtWidgets.QTableWidgetItem(""))
 
-
         massive_plus = copy.deepcopy(massive)
         massive_minus = copy.deepcopy(massive)
-        e1 = 0.0005
-        e2 = float(self.my_table.specific_zero_cell("Addition", "E"))
+        e1 = decimal.Decimal("0.0005")
+        e_db = str(self.my_table.specific_zero_cell("Addition", "E"))
+        e2 = decimal.Decimal(e_db)
         E = e1+e2
-        A = float(self.my_table.specific_zero_cell("Addition", "A"))
+        A = decimal.Decimal(str(self.my_table.specific_zero_cell("Addition", "A")))
 
         for i in range(len(massive)-1):
             for j in range(len(massive[0])-1):
-                a = float(massive[i+1][j+1])
-
+                a = decimal.Decimal(str(massive[i+1][j+1]))
                 massive_plus[i+1][j+1] = a + E
                 massive_minus[i+1][j+1] = a - E
 
-        mu_a_plus = self.mu_a(massive_plus)
         mu_a_ = self.mu_a(massive)
+        mu_a_plus = self.mu_a(massive_plus)
         mu_a_minus = self.mu_a(massive_minus)
 
         mu_a_plus_forecast = mu_a_plus
         mu_a_forecast = mu_a_
         mu_a_minus_forecast = mu_a_minus
 
-
         for j in range(len(mu_a_)):
             for i in range(len(mu_a_[j]) + 1):
                 if i == 0:
-                    mu_a_plus_forecast[j][i] = mu_a_plus[j][i] * A + (1 - A) * (sum(mu_a_plus[j]) / len(mu_a_plus[j]))
-                    mu_a_forecast[j][i] = mu_a_[j][i] * A + (1 - A) * (sum(mu_a_[j]) / len(mu_a_[j]))
-                    mu_a_minus_forecast[j][i] = mu_a_minus[j][i] * A + (1 - A) * (
-                                sum(mu_a_minus[j]) / len(mu_a_minus[j]))
+                    cell_plus = decimal.Decimal(str(mu_a_plus[j][i]))
+                    cell_ = decimal.Decimal(str(mu_a_[j][i]))
+                    cell_minus = decimal.Decimal(str(mu_a_minus[j][i]))
+                    mid_plus = decimal.Decimal(str(sum(mu_a_plus[j]) / len(mu_a_plus[j])))
+                    mid_ = decimal.Decimal(str(sum(mu_a_[j]) / len(mu_a_[j])))
+                    mid_minus = decimal.Decimal(str(sum(mu_a_minus[j]) / len(mu_a_minus[j])))
+
+                    mu_a_plus_forecast[j][i] = cell_plus * A + (1 - A) * mid_plus
+                    mu_a_forecast[j][i] = cell_ * A + (1 - A) * mid_
+                    mu_a_minus_forecast[j][i] = cell_minus * A + (1 - A) * mid_minus
                 elif i == len(mu_a_[j]):
                     mu_a_plus_forecast[j].append(
-                        (sum(mu_a_plus_forecast[j]) / len(mu_a_plus_forecast[j])) * A + (1 - A) * mu_a_plus_forecast[j][
-                            len(mu_a_[j]) - 1])
+                        decimal.Decimal(str(sum(mu_a_plus_forecast[j]) / len(mu_a_plus_forecast[j]))) * A + (1 - A) * decimal.Decimal(str(mu_a_plus_forecast[j][
+                            len(mu_a_[j]) - 1])))
                     mu_a_minus_forecast[j].append(
-                        (sum(mu_a_minus_forecast[j]) / len(mu_a_minus_forecast[j])) * A + (1 - A) *
-                        mu_a_minus_forecast[j][len(mu_a_[j]) - 1])
+                        decimal.Decimal(str(sum(mu_a_minus_forecast[j]) / len(mu_a_minus_forecast[j]))) * A + (1 - A) *
+                        decimal.Decimal(str(mu_a_minus_forecast[j][len(mu_a_[j]) - 1])))
                     mu_a_forecast[j].append(
-                        (sum(mu_a_forecast[j]) / len(mu_a_forecast[j])) * A + (1 - A) * mu_a_forecast[j][
-                            len(mu_a_[j]) - 1])
+                        decimal.Decimal(str(sum(mu_a_forecast[j]) / len(mu_a_forecast[j]))) * A + (1 - A) * decimal.Decimal(str(mu_a_forecast[j][
+                            len(mu_a_[j]) - 1])))
 
                 else:
-                    mu_a_plus_forecast[j][i] = mu_a_plus[j][i] * A + (1 - A) * mu_a_plus_forecast[j][i - 1]
-                    mu_a_forecast[j][i] = mu_a_[j][i] * A + (1 - A) * mu_a_forecast[j][i - 1]
-                    mu_a_minus_forecast[j][i] = mu_a_minus[j][i] * A + (1 - A) * mu_a_minus_forecast[j][i - 1]
+                    mu_a_plus_forecast[j][i] = decimal.Decimal(str(mu_a_plus[j][i])) * A + (1 - A) * decimal.Decimal(str(mu_a_plus_forecast[j][i - 1]))
+                    mu_a_forecast[j][i] = decimal.Decimal(str(mu_a_[j][i])) * A + (1 - A) * decimal.Decimal(str(mu_a_forecast[j][i - 1]))
+                    mu_a_minus_forecast[j][i] = decimal.Decimal(str(mu_a_minus[j][i])) * A + (1 - A) * decimal.Decimal(str(mu_a_minus_forecast[j][i - 1]))
 
         for i in range(table.rowCount() - 1):
             table.setItem(i, 1, PySide6.QtWidgets.QTableWidgetItem(str(mu_a_plus[0][i])))
@@ -628,25 +668,31 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         tab_widget.scatter_.setData(x_, y_)
         tab_widget.scatter_neg.setData(x_minus, y_minus)
 
+        vert_headers = []
+        for i in range(data_table.rowCount()):
+            vert_headers.append(data_table.item(i, 0).text())
+        print(vert_headers)
         tab_widget.scatter_pos_forecast.setData(x_plus_forecast, y_plus_forecast)
         tab_widget.scatter_forecast.setData(x_forecast, y_forecast)
         tab_widget.scatter_neg_forecast.setData(x_minus_forecast, y_minus_forecast)
 
         line1 = graph.Graph(tab_widget.graph_phase_pos)
-        text1 = line1.setDots(x_plus, y_plus, "g", tab_widget.graph_phase)
+        text1 = line1.setDots(x_plus, y_plus, "g", tab_widget.graph_phase, vert_headers)
         line2 = graph.Graph(tab_widget.graph_phase_neu)
-        text2 = line2.setDots(x_, y_, "y", tab_widget.graph_phase)
+        text2 = line2.setDots(x_, y_, "y", tab_widget.graph_phase, vert_headers)
         line3 = graph.Graph(tab_widget.graph_phase_neg)
-        text3 = line3.setDots(x_minus, y_minus, "b", tab_widget.graph_phase)
+        text3 = line3.setDots(x_minus, y_minus, "b", tab_widget.graph_phase, vert_headers)
         line4 = graph.Graph(tab_widget.graph_phase_pos_forecast)
-        text4 = line4.setDots(x_plus_forecast, y_plus_forecast, "g", tab_widget.graph_phase)
+        text4 = line4.setDots(x_plus_forecast, y_plus_forecast, "g", tab_widget.graph_phase, vert_headers)
         line5 = graph.Graph(tab_widget.graph_phase_neu_forecast)
-        text5 = line5.setDots(x_forecast, y_forecast, "y", tab_widget.graph_phase)
+        text5 = line5.setDots(x_forecast, y_forecast, "y", tab_widget.graph_phase, vert_headers)
         line6 = graph.Graph(tab_widget.graph_phase_neg_forecast)
-        text6 = line6.setDots(x_minus_forecast, y_minus_forecast, "b", tab_widget.graph_phase)
+        text6 = line6.setDots(x_minus_forecast, y_minus_forecast, "b", tab_widget.graph_phase, vert_headers)
         texts = [text3, text2, text1, text6, text5, text4]
 
         for key, value in tab_widget.dict_chb_graph.items():
+            if len(value) > 2:
+                value.pop(2)
             idx = list(tab_widget.dict_chb_graph.keys()).index(key)
             value.append(texts[idx])
 
@@ -680,21 +726,27 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         tab_widget.scatter_func_forecast.setData(x_forecast, y_forecast)
         tab_widget.scatter_func_neg_forecast.setData(x_forecast, y_minus_forecast)
 
+        vert_headers = []
+        for i in range(data_table.rowCount()):
+            vert_headers.append(data_table.item(i, 0).text())
+
         line1 = graph.Graph(tab_widget.graph_func_pos)
-        text1 = line1.setDots(x_, y_plus, "g", tab_widget.graph_func)
+        text1 = line1.setDots(x_, y_plus, "g", tab_widget.graph_func, vert_headers)
         line2 = graph.Graph(tab_widget.graph_func_neu)
-        text2 = line2.setDots(x_, y_, "y", tab_widget.graph_func)
+        text2 = line2.setDots(x_, y_, "y", tab_widget.graph_func, vert_headers)
         line3 = graph.Graph(tab_widget.graph_func_neg)
-        text3 = line3.setDots(x_, y_minus, "b", tab_widget.graph_func)
+        text3 = line3.setDots(x_, y_minus, "b", tab_widget.graph_func, vert_headers)
         line4 = graph.Graph(tab_widget.graph_func_pos_forecast)
-        text4 = line4.setDots(x_forecast, y_plus_forecast, "g", tab_widget.graph_func)
+        text4 = line4.setDots(x_forecast, y_plus_forecast, "g", tab_widget.graph_func, vert_headers)
         line5 = graph.Graph(tab_widget.graph_func_neu_forecast)
-        text5 = line5.setDots(x_forecast, y_forecast, "y", tab_widget.graph_func)
+        text5 = line5.setDots(x_forecast, y_forecast, "y", tab_widget.graph_func, vert_headers)
         line6 = graph.Graph(tab_widget.graph_func_neg_forecast)
-        text6 = line6.setDots(x_forecast, y_minus_forecast, "b", tab_widget.graph_func)
+        text6 = line6.setDots(x_forecast, y_minus_forecast, "b", tab_widget.graph_func, vert_headers)
         texts = [text3, text2, text1, text6, text5, text4]
 
         for key, value in tab_widget.dict_chb_graph_func.items():
+            if len(value) > 2:
+                value.pop(2)
             idx = list(tab_widget.dict_chb_graph_func.keys()).index(key)
             value.append(texts[idx])
 
@@ -1061,11 +1113,13 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
     def fill_tab5(self):
         massive = self.compess_table(self.ui.table_1)
         x = []
+        head = []
         self.tab5.listbox_all_dots.clear()
         self.tab5.graph_phase.clear()
         self.tab5.dict_chb_graph.clear()
         for i in range(len(massive)-1):
             x.append(massive[i+1][0])
+
         for i in range(len(massive[0])-1):
             chb_item = PySide6.QtWidgets.QCheckBox(str(massive[0][i+1]))
             list_item = PySide6.QtWidgets.QListWidgetItem()
@@ -1074,19 +1128,31 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             y = []
             for j in range(len(massive)-1):
                 y.append(massive[j+1][i+1])
-            print(x, y, sep="\n")
+            # print(x, y, sep="\n")
             plot = self.tab5.main_plot.plot(x, y)
             plot.setVisible(False)
-            self.tab5.dict_chb_graph[chb_item] = plot
+            self.tab5.dict_chb_graph[chb_item] = [plot]
+
+            count = 0
+            texts = []
+            for (xi, yi) in zip(x, y):
+                text = pyqtgraph.TextItem(str(int(x[count])), anchor=(0, 1))
+                text.setPos(xi, yi)
+                self.tab5.graph_phase.addItem(text)
+                text.setVisible(False)
+                texts.append(text)
+                count += 1
+            self.tab5.dict_chb_graph[chb_item].append(texts)
 
         for checkbox in self.tab5.dict_chb_graph.keys():
             checkbox.stateChanged.connect(self.update_plots)
 
     def update_plots(self):
         # self.tab5.graph_phase.clear()
-        for checkbox, plot in self.tab5.dict_chb_graph.items():
-            plot.setVisible(checkbox.isChecked())
-            print(checkbox.isChecked())
+        for checkbox, plot_text in self.tab5.dict_chb_graph.items():
+            plot_text[0].setVisible(checkbox.isChecked())
+            for i in plot_text[1]:
+                i.setVisible(checkbox.isChecked())
         self.tab5.graph_phase.autoRange()
 
 
@@ -1095,12 +1161,14 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         massive = self.compess_table(self.ui.table_1)
         add_head = ["\u03BC", "\u03B1 с шумом", "\u03B1 без шума", "Оценка"]
         massive[0].extend(add_head)
-        print(massive[0])
+        # print(massive[0])
         table.setRowCount(len(massive)-1)
         table.setColumnCount(len(massive[0]))
         table.verticalHeader().hide()
         for col in range(len(massive[0])):
             table.setHorizontalHeaderItem(col, PySide6.QtWidgets.QTableWidgetItem(str(massive[0][col])))
+        for row in range(len(massive)-1):
+            table.setItem(row, 0, PySide6.QtWidgets.QTableWidgetItem(str(int(massive[row+1][0]))))
 
 
     def fill_rest_tab6(self):
@@ -1114,68 +1182,254 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             self.tab6.table_rest.setItem(row, 0, PySide6.QtWidgets.QTableWidgetItem(str(int(massive_main[row+1][0]))))
             for col in range(len(massive_main[0]) - 1):
                 self.tab6.table_rest.setItem(row, col+1, PySide6.QtWidgets.QTableWidgetItem(str(massive_main[1][col+1])))
+
+        massive_rest = []
+        headers_rest = []
+        for i in range(self.tab6.table_rest.columnCount()-4):
+            headers_rest.append(self.tab6.table_rest.horizontalHeaderItem(i).text())
+        massive_rest.append(headers_rest)
+
+        for i in range(self.tab6.table_rest.rowCount()):
+            row = []
+            row.clear()
+            for j in range(self.tab6.table_rest.columnCount()-4):
+                row.append(float(self.tab6.table_rest.item(i, j).text()))
+            massive_rest.append(row)
+
+        mu_a = self.mu_a(massive_rest)
+
+        # С шумом
+        for i in range(self.tab6.table_rest.rowCount()):
+            self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 4,
+                                         PySide6.QtWidgets.QTableWidgetItem(str(mu_a[0][i])))
+        self.tab6.table_rest.setItem(0, self.tab6.table_rest.columnCount() - 3,
+                                     PySide6.QtWidgets.QTableWidgetItem(str(0)))
+
+        for i in range(self.tab6.table_rest.rowCount()-1):
+            self.tab6.table_rest.setItem(i+1, self.tab6.table_rest.columnCount() - 3,
+                                         PySide6.QtWidgets.QTableWidgetItem(str(mu_a[1][i])))
+        self.tab6.table_rest.resizeColumnToContents(self.tab6.table_rest.columnCount() - 3)
+
+        # Без шума
+        self.tab6.table_rest.setItem(0, self.tab6.table_rest.columnCount() - 2,
+                                     PySide6.QtWidgets.QTableWidgetItem(str(0)))
+
+        for i in range(self.tab6.table_rest.rowCount()-1):
+            self.tab6.table_rest.setItem(i+1, self.tab6.table_rest.columnCount() - 2,
+                                         PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 7))))
+
+        # Оценка
+        E_const = float(self.my_table.specific_zero_cell("Addition", "E"))
+        evaluation = []
+        for i in range(self.tab6.table_rest.rowCount()):
+            cell_standart = float(self.tab6.table_rest.item(i, 1).text())
+            cell = float(self.tab6.table_rest.item(i, 1).text())
+            delta = math.fabs(cell - cell_standart)
+            evaluation.append(delta)
+
+        for i in range(self.tab6.table_rest.rowCount()):
+            if evaluation[i] <= E_const:
+                self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 1,
+                                             PySide6.QtWidgets.QTableWidgetItem(str("+")))
+                self.tab6.table_rest.item(i, self.tab6.table_rest.columnCount() - 1).setBackground(QtGui.QColor(0, 255, 0))
+            else:
+                self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 1,
+                                             PySide6.QtWidgets.QTableWidgetItem(str("-")))
+                self.tab6.table_rest.item(i, self.tab6.table_rest.columnCount() - 1).setBackground(
+                    QtGui.QColor(255, 0, 0))
+
+    def fill_table_uni_tab6(self):
+        self.design_table_tab6(self.tab6.table_uni)
+        row_zero = []
+        massive = self.compess_table(self.ui.table_1)
+        delta = decimal.Decimal("0.0002")
+        for i in range(len(massive[1])-1):
+            row_zero.append(massive[1][i+1])
+        for i in range(self.tab6.table_uni.rowCount()):
+            for j in range(len(row_zero)):
+                self.tab6.table_uni.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(str(decimal.Decimal(str(row_zero[j])) + delta * i)))
+
+        self.fill_table_analyze_tab6(self.tab6.table_uni)
+
+
+
+    def fill_table_leap_tab6(self):
+        self.design_table_tab6(self.tab6.table_leap)
+        row_zero = []
+        massive = self.compess_table(self.ui.table_1)
+        delta = decimal.Decimal("0.0002")
+        for i in range(len(massive[1]) - 1):
+            row_zero.append(massive[1][i + 1])
+
+        for i in range(self.tab6.table_leap.rowCount()):
+            for j in range(len(row_zero)):
+                self.tab6.table_leap.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(str(self.tab6.table_uni.item(i, j + 1).text())))
+
+        cent_id = int(self.tab6.table_uni.rowCount() / 2)
+
+        for i in range(len(row_zero)):
+            cell = decimal.Decimal(self.tab6.table_leap.item(cent_id, i+1).text())
+            self.tab6.table_leap.setItem(cent_id, i + 1, PySide6.QtWidgets.QTableWidgetItem(str(cell + delta * 8)))
+        self.fill_table_analyze_tab6(self.tab6.table_leap)
+
+    def fill_cyclic_tab6(self):# Не доделана
+        self.design_table_tab6(self.tab6.table_cyclic)
+        row_zero = []
+        massive = self.compess_table(self.ui.table_1)
+        delta = decimal.Decimal("0.0002")
+        for i in range(len(massive[1]) - 1):
+            row_zero.append(massive[1][i + 1])
+
+        for j in range(len(row_zero)):
+            self.tab6.table_leap.setItem(0, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                str(row_zero[j])))
+
+        cent_id = int(self.tab6.table_cyclic.rowCount() / 2)
+        if self.tab6.table_cyclic.rowCount() % 2 == 0:
+            for i in range(1, cent_id):
+                rand = decimal.Decimal(str(random.randint(0, 50) * decimal.Decimal("0.00001")))
+                for j in range(len(row_zero)):
+                    cell =  rand + decimal.Decimal(self.tab6.table_uni.item(i-1, j + 1).text())
+                    self.tab6.table_cyclic.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                        str(cell)))
+
+
+        elif self.tab6.table_cyclic.rowCount() % 2 == 1:
+            for i in range(1, cent_id):
+                rand = decimal.Decimal(str(random.randint(0, 50) * decimal.Decimal("0.00001")))
+                for j in range(len(row_zero)):
+                    cell = rand + decimal.Decimal(self.tab6.table_uni.item(i - 1, j + 1).text())
+                    self.tab6.table_cyclic.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                        str(cell)))
+
+        for i in range(self.tab6.table_cyclic.rowCount()):
+            for j in range(len(row_zero)):
+                self.tab6.table_leap.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                    str(self.tab6.table_uni.item(i, j + 1).text())))
+
+
+
+        for i in range(len(row_zero)):
+            cell = decimal.Decimal(self.tab6.table_leap.item(cent_id, i + 1).text())
+            self.tab6.table_leap.setItem(cent_id, i + 1, PySide6.QtWidgets.QTableWidgetItem(str(cell + delta * 8)))
+        self.fill_table_analyze_tab6(self.tab6.table_leap)
+
+    def fill_table_analyze_tab6(self, table):
+        massive_data = []
+        headers_rest = []
+        for i in range(table.columnCount() - 4):
+            headers_rest.append(table.horizontalHeaderItem(i).text())
+        massive_data.append(headers_rest)
+
+        for i in range(table.rowCount()):
+            row = []
+            row.clear()
+            for j in range(table.columnCount() - 4):
+                row.append(float(table.item(i, j).text()))
+            massive_data.append(row)
+
+        mu_a = self.mu_a(massive_data)
+
+        # С шумом
+        for i in range(table.rowCount()):
+            table.setItem(i, table.columnCount() - 4,
+                                         PySide6.QtWidgets.QTableWidgetItem(str(mu_a[0][i])))
+        table.setItem(0, table.columnCount() - 3,
+                                     PySide6.QtWidgets.QTableWidgetItem(str(0)))
+
+        for i in range(table.rowCount() - 1):
+            table.setItem(i + 1, table.columnCount() - 3,
+                                         PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 2))))
+        table.resizeColumnToContents(table.columnCount() - 3)
+
+        # Без шума
+        table.setItem(0, table.columnCount() - 2,
+                                     PySide6.QtWidgets.QTableWidgetItem(str(0)))
+
+        for i in range(table.rowCount() - 1):
+            table.setItem(i + 1, table.columnCount() - 2,
+                                         PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 7))))
+
+        # Оценка
+        E_const = float(self.my_table.specific_zero_cell("Addition", "E"))
+        evaluation = []
+        for i in range(table.rowCount()):
+            cell_standart = float(self.tab6.table_uni.item(i, 1).text())
+            cell = float(table.item(i, 1).text())
+            delta = math.fabs(cell - cell_standart)
+            evaluation.append(delta)
+
+        for i in range(table.rowCount()):
+            if evaluation[i] <= E_const:
+                table.setItem(i, table.columnCount() - 1,
+                                             PySide6.QtWidgets.QTableWidgetItem(str("+")))
+                table.item(i, table.columnCount() - 1).setBackground(
+                    QtGui.QColor(0, 255, 0))
+            else:
+                table.setItem(i, table.columnCount() - 1,
+                                             PySide6.QtWidgets.QTableWidgetItem(str("-")))
+                table.item(i, table.columnCount() - 1).setBackground(
+                    QtGui.QColor(255, 0, 0))
+
+    def fill_tab6_graph(self):
+        # Clear
+        self.tab6.plot_widget_rest_w_noise.clear()
+        self.tab6.plot_widget_rest_wo_noise.clear()
+        self.tab6.plot_widget_uni_w_noise.clear()
+        self.tab6.plot_widget_uni_wo_noise.clear()
+        self.tab6.plot_widget_leap_w_noise.clear()
+        self.tab6.plot_widget_leap_wo_noise.clear()
+        self.tab6.plot_widget_cyclic_w_noise.clear()
+        self.tab6.plot_widget_cyclic_wo_noise.clear()
+        # Constants
+        row_count = self.tab6.table_rest.rowCount()
+        col_mu = self.tab6.table_rest.columnCount() - 4
+        col_a_w = self.tab6.table_rest.columnCount() - 3
+        col_a_wo = self.tab6.table_rest.columnCount() - 2
+        headers = []
+        for i in range(row_count):
+            headers.append(str(int(self.tab6.table_rest.item(i, 0).text())))
+
+        # tab rest
+        x_rest = []
+        y_rest_w = []
+        y_rest_wo = []
+
+        x_rest.append(float(self.tab6.table_rest.item(0, col_mu).text()))
+        y_rest_w.append(float(self.tab6.table_rest.item(0, col_a_w).text()))
+        y_rest_wo.append(float(self.tab6.table_rest.item(0, col_a_wo).text()))
+
+        scatter_rest_w = pyqtgraph.ScatterPlotItem(x_rest, y_rest_w)
+        scatter_rest_wo = pyqtgraph.ScatterPlotItem(x_rest, y_rest_wo)
+        self.tab6.plot_widget_rest_w_noise.addItem(scatter_rest_w, brush="r")
+        self.tab6.plot_widget_rest_wo_noise.addItem(scatter_rest_wo, brush="r")
+
+        # tab uni
+        x_uni = []
+        y_uni_w = []
+        y_uni_wo = []
+
+        for i in range(row_count):
+            x_uni.append(float(self.tab6.table_uni.item(i, col_mu).text()))
+            y_uni_w.append(float(self.tab6.table_uni.item(i, col_a_w).text()))
+            y_uni_wo.append(float(self.tab6.table_uni.item(i, col_a_wo).text()))
+
+
+        uni_w = graph.Graph(self.tab6.plot_widget_uni_w_noise.plot())
+        uni_w.setDots(x_uni, y_uni_w, "w", self.tab6.plot_widget_uni_w_noise, headers)
+        uni_wo = graph.Graph(self.tab6.plot_widget_uni_wo_noise.plot())
+        uni_wo.setDots(x_uni, y_uni_wo, "w", self.tab6.plot_widget_uni_wo_noise, headers)
+
+        # uni_w_noise = graph.Graph(self.tab6.plot_widget_rest_w_noise)
+        # uni_wo_noise = graph.Graph(self.tab6.plot_widget_rest_wo_noise)
         #
-        # massive_rest = []
-        # headers_rest = []
-        # for i in range(self.tab6.table_rest.columnCount()-4):
-        #     headers_rest.append(self.tab6.table_rest.horizontalHeaderItem(i).text())
-        # massive_rest.append(headers_rest)
         #
-        # for i in range(self.tab6.table_rest.rowCount()):
-        #     row = []
-        #     row.clear()
-        #     for j in range(self.tab6.table_rest.columnCount()-4):
-        #         row.append(float(self.tab6.table_rest.item(i, j).text()))
-        #     massive_rest.append(row)
-        #
-        # mu_a = self.mu_a(massive_rest)
-        # print(len(mu_a[1]))
-        # print(self.tab6.table_rest.rowCount())
-        # # С шумом
-        # for i in range(self.tab6.table_rest.rowCount()):
-        #     self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 4,
-        #                                  PySide6.QtWidgets.QTableWidgetItem(str(mu_a[0][i])))
-        # self.tab6.table_rest.setItem(0, self.tab6.table_rest.columnCount() - 3,
-        #                              PySide6.QtWidgets.QTableWidgetItem(str(0)))
-        #
-        # for i in range(self.tab6.table_rest.rowCount()-1):
-        #     self.tab6.table_rest.setItem(i+1, self.tab6.table_rest.columnCount() - 3,
-        #                                  PySide6.QtWidgets.QTableWidgetItem(str(mu_a[1][i])))
-        # self.tab6.table_rest.resizeColumnToContents(self.tab6.table_rest.columnCount() - 3)
-        #
-        # # Без шума
-        # self.tab6.table_rest.setItem(0, self.tab6.table_rest.columnCount() - 2,
-        #                              PySide6.QtWidgets.QTableWidgetItem(str(0)))
-        #
-        # for i in range(self.tab6.table_rest.rowCount()-1):
-        #     self.tab6.table_rest.setItem(i+1, self.tab6.table_rest.columnCount() - 2,
-        #                                  PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 7))))
-        #
-        # # Оценка
-        # E_const = float(self.my_table.specific_zero_cell("Addition", "E"))
-        # evaluation = []
-        # for i in range(self.tab6.table_rest.rowCount()):
-        #     cell_standart = float(self.tab6.table_rest.item(i, 1).text())
-        #     cell = float(self.tab6.table_rest.item(i, 1).text())
-        #     delta = math.fabs(cell - cell_standart)
-        #     evaluation.append(delta)
-        #
-        # for i in range(self.tab6.table_rest.rowCount()):
-        #     if evaluation[i] <= E_const:
-        #         self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 1,
-        #                                      PySide6.QtWidgets.QTableWidgetItem(str("+")))
-        #         self.tab6.table_rest.item(i, self.tab6.table_rest.columnCount() - 1).setBackground(QtGui.QColor(0, 255, 0))
-        #     else:
-        #         self.tab6.table_rest.setItem(i, self.tab6.table_rest.columnCount() - 1,
-        #                                      PySide6.QtWidgets.QTableWidgetItem(str("-")))
-        #         self.tab6.table_rest.item(i, self.tab6.table_rest.columnCount() - 1).setBackground(
-        #             QtGui.QColor(255, 0, 0))
+        # leap_w_noise = graph.Graph(self.tab6.plot_widget_rest_w_noise)
+        # leap_wo_noise = graph.Graph(self.tab6.plot_widget_rest_wo_noise)
 
 
 if __name__ == "__main__":
     app = PySide6.QtWidgets.QApplication(sys.argv)
     window = MainApp()
     window.show()
-
-
     sys.exit(app.exec())

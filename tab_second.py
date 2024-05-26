@@ -55,7 +55,7 @@ class SecondTabUI(object):
 
         self.graph_phase_pos_forecast = graph_phase.plot(name="\u03B1(\u03BC)+")
         self.graph_phase_neu_forecast = graph_phase.plot(name="\u03B1(\u03BC)")
-        self.graph_phase_neg_forecast = graph_phase.plot(name="\u03B1(\u03BC)-")
+        self.graph_phase_neg_forecast = graph_phase.plot(name="\u03B1(\u03BC)- с прогнозным")
 
         # <Гроупбокс "Параметры графиков"
         self.groupbox_phase_param = PySide6.QtWidgets.QGroupBox("Параметры графиков")
