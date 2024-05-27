@@ -1,7 +1,7 @@
 import decimal
 import PySide6
 import pyqtgraph
-from PySide6 import QtWidgets, QtGui
+from PySide6 import QtWidgets, QtGui, QtCore
 import sys
 import math
 import copy
@@ -36,6 +36,9 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         help_open = PySide6.QtGui.QAction("Справка", self.ui.lineEdit_exp)
         help_open.triggered.connect(self.open_help_window)
+
+        self.img = PySide6.QtGui.QPixmap("image.jpg")
+        self.img_dots = PySide6.QtGui.QPixmap("imageDots.jpg")
 
         self.ui.help_button.addAction(help_open)
 
@@ -272,7 +275,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
     def fill_combobox(self):  # Заполенение комбобокса именами таблиц БД
         self.my_table = DataBaseClass.DataBase(self.path)
         for i in self.my_table.table_names():
-            self.ui.combobox_choose_db.addItem(str(i)[2:-3])
+            if not (str(i)[2:-3].lower()).startswith("add"):
+                self.ui.combobox_choose_db.addItem(str(i)[2:-3])
 
     def row_delete(self):  # удаление выделенной строки
         self.buffer_updater()
@@ -335,36 +339,82 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def button_param_confirm(self):
         if self.ui.lineEdit_exp.text() != '':
-            a = float(self.ui.lineEdit_exp.text())
-            b = float(self.ui.lineEdit_error.text())
-            if a > 1 or a < 0:
+            A = self.ui.lineEdit_exp.text()
+            E = self.ui.lineEdit_error.text()
+
+            def is_number(s):
+                try:
+                    decimal.Decimal(s)
+                    return True
+                except decimal.InvalidOperation:
+                    return False
+            try:
+                a = decimal.Decimal(str(A))
+                b = decimal.Decimal(str(E))
+            except:
+                a = -1
+                b = -1
+
+            if a > 1 or a < 0 or not is_number(A) or A == "":
                 msgbox = PySide6.QtWidgets.QMessageBox()
-                msgbox.critical(self.ui.widget_first_tab, "Параметр некорректен", "Измените параметр")
+                msgbox.critical(self.ui.widget_first_tab, "Ошибка", "Коэффициент экспоненциального сглаживания некорректен.\nИзмените параметр")
+            elif b < 0 or not is_number(E) or E == "":
+                msgbox = PySide6.QtWidgets.QMessageBox()
+                msgbox.critical(self.ui.widget_first_tab, "Ошибка", "Значение погрешности измерения некорректно.\nИзмените параметр")
+
             else:
                 self.my_table.update_cell("Addition", "A", "id", 0, a)
                 self.my_table.update_cell("Addition", "E", "id", 0, b)
                 self.update_tab2()
 
     def fill_img(self):
-        data = self.my_table.specific_byte_cell()
+        data = self.my_table.specific_byte_cell("Img")
         with open("image.jpg", "wb") as file:
             file.write(data)
 
-        img = PySide6.QtGui.QPixmap("image.jpg")
-        #img.scaledToHeight(int(self.ui.groupbox_table1.height()))
-        #img.scaledToWidth(int(self.ui.groupbox_table1.width()))
-        self.ui.label_img.setMaximumWidth(int(self.ui.groupbox_table1.width()))
-        self.ui.label_img.setMaximumHeight(int(self.ui.groupbox_table1.height()))
-        self.ui.label_img.setPixmap(img)
+        self.img = PySide6.QtGui.QPixmap("image.jpg")
+        self.ui.label_img.setAlignment(PySide6.QtCore.Qt.AlignCenter)
+        # self.ui.label_img.setMaximumWidth(int(self.ui.groupbox_table1.width()))
+        # self.ui.label_img.setMaximumHeight(int(self.ui.groupbox_table1.height()))
+        self.ui.label_img.setPixmap(self.img)
 
         self.ui.la_1.addWidget(self.ui.label_img)
         # self.ui.groupbox_img1.setFixedHeight(int(self.ui.groupbox_table1.height()))
         # self.ui.groupbox_img1.setFixedWidth(int(self.ui.groupbox_table1.width()))
         self.ui.groupbox_img1.updateGeometry()
 
+        data_dots = self.my_table.specific_byte_cell("DotsImg")
+        with open("imageDots.jpg", "wb") as file_:
+            file_.write(data)
+
+        self.img_dots = PySide6.QtGui.QPixmap("imageDots.jpg")
+        self.tab3.label_pict.setPixmap(self.img_dots)
+
+        # self.ui.groupbox_img1.setFixedHeight(int(self.ui.groupbox_table1.height()))
+        # self.ui.groupbox_img1.setFixedWidth(int(self.ui.groupbox_table1.width()))
+        #self.ui.groupbox_img1.updateGeometry()
+
         msgbox = PySide6.QtWidgets.QMessageBox()
         msgbox.setText("Картинка добавлена")
         msgbox.exec()
+
+    def resizeEvent(self, event):
+        self.resize_image()
+        super().resizeEvent(event)
+
+    def resize_image(self):
+        # Получение размеров QLabel
+        label1_size = self.ui.label_img.size()
+        label2_size = self.tab3.label_pict.size()
+        # Масштабирование изображения
+
+        scaled_pixmap1 = self.img.scaled(label1_size, PySide6.QtCore.Qt.KeepAspectRatio,
+                                           PySide6.QtCore.Qt.SmoothTransformation)
+        scaled_pixmap2 = self.img_dots.scaled(label2_size, PySide6.QtCore.Qt.KeepAspectRatio,
+                                           PySide6.QtCore.Qt.SmoothTransformation)
+
+        self.ui.label_img.setPixmap(scaled_pixmap1)
+        self.tab3.label_pict.setPixmap(scaled_pixmap2)
 
     def fill_table(self):
         if self.path != "":
@@ -404,6 +454,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.ui.widget_third_tab.setEnabled(False)
         self.ui.widget_forth_tab.setEnabled(False)
         self.tab3.widget_tab2.setEnabled(False)
+        self.tab3.spinbox_count_blocks.setMaximum(int(self.ui.table_1.columnCount() / 2))
+
         self.tab4.widget_tab1.setEnabled(False)
         self.tab4.widget_tab2.setEnabled(False)
         self.tab4.groupbox_settings.setEnabled(False)

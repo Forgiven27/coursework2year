@@ -360,6 +360,12 @@ class ForthTabUI(object):
         self.layout_right_tab2.addWidget(self.tabwidget_inserted)
         self.layout_right_tab2.addWidget(self.groupbox_next_dec)
 
+        # Блокировка ячеек
+        self.table_monit.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+        self.table_phase_coor.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+        self.table1_tab1.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+        self.table2_tab1.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+
         # Сборка таб 2
         self.layout_tab2.addLayout(self.layout_left_tab2)
         self.layout_tab2.addLayout(self.layout_right_tab2)

@@ -35,6 +35,8 @@ class FifthTabUI(object):
         self.layout_right = PySide6.QtWidgets.QVBoxLayout()
         self.layout_right.addWidget(self.graph_phase)
 
+
+
         # Компановка
         self.main_horlay.addLayout(self.layout_left,1)
         self.main_horlay.addLayout(self.layout_right,3)

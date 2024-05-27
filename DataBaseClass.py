@@ -23,9 +23,9 @@ class DataBase:
         self.cursor.execute(f"UPDATE {table_name} SET {column_name} = {new_value} WHERE {column_key} = {key_value}")
         self.connection.commit()
 
-    def specific_byte_cell(self):
+    def specific_byte_cell(self, column_name):
         self.connection.text_factory = bytes
-        self.cursor.execute(f"SELECT Img FROM Addition")
+        self.cursor.execute(f"SELECT {column_name} FROM Addition")
         cell = self.cursor.fetchall()
         self.connection.text_factory = str
         return cell[0][0]

@@ -127,7 +127,10 @@ class SixthTabUI(object):
         self.layout_4_tab.addLayout(self.layout_group_cyclic)
         self.layout_4_tab.addWidget(self.table_cyclic)
 
-
+        self.table_uni.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+        self.table_rest.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+        self.table_leap.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+        self.table_cyclic.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
 
         self.tabwidget_main.addTab(self.widget_1_rest, "Покой")
         self.tabwidget_main.addTab(self.widget_2_uniform, "Равномерное движение")

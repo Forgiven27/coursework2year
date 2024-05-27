@@ -185,6 +185,10 @@ class SecondTabUI(object):
         self.layout_right.addWidget(self.tabwidget)
         self.layout_right.addWidget(self.groupbox_next_dec)
 
+        # Блокировка ячеек
+        self.table_monit.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+        self.table_phase_coor.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+
         # Сборка слоёв
         self.main_horlay.addLayout(self.layout_left)
         self.main_horlay.addLayout(self.layout_right)
