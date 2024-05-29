@@ -8,6 +8,7 @@ import copy
 import random
 import DataBaseClass
 import graph
+import numpy
 from TextWindow import HelpWindow
 from main_UI import MainWindow_UI
 from tab_second import SecondTabUI
@@ -15,6 +16,7 @@ from tab_third import ThirdTabUI
 from tab_forth import ForthTabUI
 from tab_fifth import FifthTabUI
 from tab_sixth import SixthTabUI
+from table_delegate import NumericDelegate
 
 
 class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
@@ -37,8 +39,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         help_open = PySide6.QtGui.QAction("Справка", self.ui.lineEdit_exp)
         help_open.triggered.connect(self.open_help_window)
 
-        self.img = PySide6.QtGui.QPixmap("image.jpg")
-        self.img_dots = PySide6.QtGui.QPixmap("imageDots.jpg")
+        self.img = PySide6.QtGui.QPixmap()
+        self.img_dots = PySide6.QtGui.QPixmap()
 
         self.ui.help_button.addAction(help_open)
 
@@ -86,7 +88,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         self.tab2.button_recom.clicked.connect(lambda:self.rec_box(self.tab2.table_monit))
         self.tab2.button_next_dec.clicked.connect(self.open_next_tab)
-        # self.tab2.button_recom.clicked.connect(lambda :self.clear_all_graph(self.tab2))
 
         self.tab3.spinbox_count_blocks.textChanged.connect(self.fill_blocks)
         self.tab3.button_confirm.clicked.connect(self.tab3_button_confirm)
@@ -338,7 +339,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                     msgbox.exec()
 
     def button_param_confirm(self):
-        if self.ui.lineEdit_exp.text() != '':
+        if self.ui.lineEdit_exp.text() != '' or self.ui.lineEdit_error.text() != '':
             A = self.ui.lineEdit_exp.text()
             E = self.ui.lineEdit_error.text()
 
@@ -366,6 +367,10 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                 self.my_table.update_cell("Addition", "A", "id", 0, a)
                 self.my_table.update_cell("Addition", "E", "id", 0, b)
                 self.update_tab2()
+        else:
+            msgbox = PySide6.QtWidgets.QMessageBox()
+            msgbox.critical(self.ui.widget_first_tab, "Ошибка",
+                            "Значение погрешности измерения некорректно.\nИзмените параметр")
 
     def fill_img(self):
         data = self.my_table.specific_byte_cell("Img")
@@ -374,25 +379,18 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         self.img = PySide6.QtGui.QPixmap("image.jpg")
         self.ui.label_img.setAlignment(PySide6.QtCore.Qt.AlignCenter)
-        # self.ui.label_img.setMaximumWidth(int(self.ui.groupbox_table1.width()))
-        # self.ui.label_img.setMaximumHeight(int(self.ui.groupbox_table1.height()))
         self.ui.label_img.setPixmap(self.img)
 
         self.ui.la_1.addWidget(self.ui.label_img)
-        # self.ui.groupbox_img1.setFixedHeight(int(self.ui.groupbox_table1.height()))
-        # self.ui.groupbox_img1.setFixedWidth(int(self.ui.groupbox_table1.width()))
         self.ui.groupbox_img1.updateGeometry()
 
         data_dots = self.my_table.specific_byte_cell("DotsImg")
         with open("imageDots.jpg", "wb") as file_:
-            file_.write(data)
+            file_.write(data_dots)
 
         self.img_dots = PySide6.QtGui.QPixmap("imageDots.jpg")
         self.tab3.label_pict.setPixmap(self.img_dots)
-
-        # self.ui.groupbox_img1.setFixedHeight(int(self.ui.groupbox_table1.height()))
-        # self.ui.groupbox_img1.setFixedWidth(int(self.ui.groupbox_table1.width()))
-        #self.ui.groupbox_img1.updateGeometry()
+        self.resize_image()
 
         msgbox = PySide6.QtWidgets.QMessageBox()
         msgbox.setText("Картинка добавлена")
@@ -434,11 +432,11 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                 self.ui.table_1.setHorizontalHeaderItem(i, PySide6.QtWidgets.QTableWidgetItem(columns_names[i]))
             for i in vert_head_massive:
                 self.ui.table_1.setVerticalHeaderItem(i, PySide6.QtWidgets.QTableWidgetItem(str(i)))
-
             for j in range(len(vert_head_massive)):
                 for i in range(count_of_columns):
                     cell = str(content_of_table[j][i]).replace(',', '.')
                     self.ui.table_1.setItem(j, i, PySide6.QtWidgets.QTableWidgetItem(cell))
+
             self.buffer_updater()
             self.fill_params()
             self.fill_img()
@@ -448,9 +446,12 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             self.ui.groupbox_cycle.setEnabled(True)
             self.ui.groupbox_param.setEnabled(True)
             self.ui.groupbox_table1.setEnabled(True)
-            self.ui.table_1.setEditTriggers(PySide6.QtWidgets.QTableWidget.NoEditTriggers)
+
 
     def update_tab2(self):
+        numeric_delegate = NumericDelegate()
+        for col in range(self.ui.table_1.columnCount()):
+            self.ui.table_1.setItemDelegateForColumn(col, numeric_delegate)
         self.ui.widget_third_tab.setEnabled(False)
         self.ui.widget_forth_tab.setEnabled(False)
         self.tab3.widget_tab2.setEnabled(False)
@@ -473,29 +474,19 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.table_monit_headers(self.tab2.table_monit, self.compess_table(self.ui.table_1))
         self.fill_mu_a(self.compess_table(self.ui.table_1), self.tab2.table_phase_coor)
         self.fill_table_monit(self.tab2.table_phase_coor, self.tab2.table_monit)
-        #self.clear_all_graph(self.tab2)
-        for item in self.tab2.graph_phase.items():
-            if isinstance(item, pyqtgraph.TextItem):
-                self.tab2.graph_phase.removeItem(item)
+
+        tabs = [self.tab2, self.tab3, self.tab4]
+        for i in tabs:
+            for item in i.graph_phase.items():
+                if isinstance(item, pyqtgraph.TextItem):
+                    i.graph_phase.removeItem(item)
+            for item in i.graph_func.items():
+                if isinstance(item, pyqtgraph.TextItem):
+                    i.graph_func.removeItem(item)
+
         self.graph_ph(self.tab2.table_phase_coor, self.tab2)
         self.graph_func(self.tab2.table_phase_coor, self.tab2)
         self.checkbox_on()
-
-
-    def clear_all_graph(self, tab_widget):
-        self.clear_text_items(tab_widget.graph_phase)
-
-    def clear_text_items(self, plot_widget):
-        items_to_remove = []
-        # print(type(plot_widget.getPlotItem().items()))
-        a = plot_widget.getPlotItem()
-        v = type(a.items())
-        # print(v)
-        # for item in plot_widget.getPlotItem().items():
-        #     if isinstance(item, pyqtgraph.TextItem):
-        #         items_to_remove.append(item)
-        # for item in items_to_remove:
-        #     plot_widget.removeItem(item)
 
     def compess_table(self, table):
         massive = []
@@ -723,7 +714,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         vert_headers = []
         for i in range(data_table.rowCount()):
             vert_headers.append(data_table.item(i, 0).text())
-        print(vert_headers)
         tab_widget.scatter_pos_forecast.setData(x_plus_forecast, y_plus_forecast)
         tab_widget.scatter_forecast.setData(x_forecast, y_forecast)
         tab_widget.scatter_neg_forecast.setData(x_minus_forecast, y_minus_forecast)
@@ -747,6 +737,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                 value.pop(2)
             idx = list(tab_widget.dict_chb_graph.keys()).index(key)
             value.append(texts[idx])
+
 
     def graph_func(self, data_table, tab_widget):
         x_ = []
@@ -835,14 +826,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             for i in self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()]:
                 self.tab4.listbox_selected_dots.addItem(str(i))
 
-        # self.tab4.listbox_unselected_dots.itemClicked.connect(self.move_dot_in_tab4)
-        # self.tab4.listbox_selected_dots.itemClicked.connect(self.move_dot_out_tab4)
-        # self.tab4.combobox_block.currentTextChanged.connect(self.subblocks_switch_tab4)
-
-
-
-
-
     def update_tab3_zerotab(self):
 
         self.tab3.combobox_choose.clear()
@@ -859,9 +842,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         if self.tab3.listbox_cont_dots.count() != 0:
             self.tab3.listbox_cont_dots.clear()
-        # self.tab3.listbox_all_dots.itemClicked.connect(self.move_dot_in)
-        # self.tab3.listbox_cont_dots.itemClicked.connect(self.move_dot_out)
-        # self.tab3.combobox_choose.currentTextChanged.connect(self.subblocks_switch)
 
     def move_dot_in(self):
 
@@ -916,7 +896,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             for i in range(int(self.tab4.spinbox_count_subblock.text())):
                 self.tab4.combobox_subblock.addItem(str(i + 1))
                 self.tab4.dict_subblocks_sub[str(i+1)] = []
-            print(self.tab4.dict_subblocks_sub)
+
             self.tab4.listbox_available_dots.clear()
 
             for i in range(self.tab4.listbox_selected_dots.count()):
@@ -989,29 +969,26 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def update_tab4_onetab(self):
         if self.tab4.combobox_choose_2.currentText() is not None and self.tab4.combobox_choose_2.currentText() != '':
+
+            tabs = [self.tab4]
+            for i in tabs:
+                for item in i.graph_phase.items():
+                    if isinstance(item, pyqtgraph.TextItem):
+                        i.graph_phase.removeItem(item)
+                for item in i.graph_func.items():
+                    if isinstance(item, pyqtgraph.TextItem):
+                        i.graph_func.removeItem(item)
             massive = self.massive_from_dots(self.tab4.dict_subblocks_sub[self.tab4.combobox_choose_2.currentText()])
 
             self.table_phase_headers(self.tab4.table_phase_coor, massive)
             self.table_monit_headers(self.tab4.table_monit, massive)
             self.fill_mu_a(massive, self.tab4.table_phase_coor)
             self.fill_table_monit(self.tab4.table_phase_coor, self.tab4.table_monit)
-            # self.clear_all_graph(self.tab2)
+
 
             self.graph_ph(self.tab4.table_phase_coor, self.tab4)
             self.graph_func(self.tab4.table_phase_coor, self.tab4)
-
-
-
-
-
-
-
-
-
-
-
-
-
+            self.checkbox_on()
 
     def tab3_button_confirm(self):
         mass = []
@@ -1090,7 +1067,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             contr_cell = massive[0][el_mass + 1]
             breker += 1
             for n in range(len(massive[0]) - breker - 1):
-                print(massive[0][el_mass + 1], massive[0][el_mass + 1 + n + 1])
+
                 cell = contr_cell + " - " + massive[0][el_mass + 1 + n + 1]
                 col_name.append(cell)
 
@@ -1106,7 +1083,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                 breker += 1
 
                 for n in range(len(massive[row])-breker-1):
-                    print(massive[0][el_mass+1], massive[0][el_mass+1 + n+1])
+
                     cell = round(math.fabs(contr_cell - massive[row+1][el_mass+1 + n+1]),4)
                     cell_mass.append(cell)
 
@@ -1115,7 +1092,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         full_green = 0
         E = self.my_table.specific_zero_cell("Addition", "E")
-        print("E = ", E)
+
         rows = self.tab4.table2_tab1.rowCount()
         for col in range(self.tab4.table2_tab1.columnCount() - 1):
             cell_zero = float(self.tab4.table1_tab1.item(0, col + 1).text())
@@ -1137,15 +1114,24 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
     def update_tab3_onetab(self):
         if self.tab3.combobox_choose_2.currentText() is not None and self.tab3.combobox_choose_2.currentText() != '':
+            tabs = [self.tab3]
+            for i in tabs:
+                for item in i.graph_phase.items():
+                    if isinstance(item, pyqtgraph.TextItem):
+                        i.graph_phase.removeItem(item)
+                for item in i.graph_func.items():
+                    if isinstance(item, pyqtgraph.TextItem):
+                        i.graph_func.removeItem(item)
             massive = self.massive_from_dots(self.tab3.dict_subblocks[self.tab3.combobox_choose_2.currentText()])
             self.table_phase_headers(self.tab3.table_phase_coor, massive)
             self.table_monit_headers(self.tab3.table_monit, massive)
             self.fill_mu_a(massive, self.tab3.table_phase_coor)
             self.fill_table_monit(self.tab3.table_phase_coor, self.tab3.table_monit)
-            # self.clear_all_graph(self.tab2)
+
 
             self.graph_ph(self.tab3.table_phase_coor, self.tab3)
             self.graph_func(self.tab3.table_phase_coor, self.tab3)
+            self.checkbox_on()
 
     def massive_from_dots(self, massive_headers):
         massive = self.compess_table(self.ui.table_1)
@@ -1171,6 +1157,26 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.tab5.dict_chb_graph.clear()
         for i in range(len(massive)-1):
             x.append(massive[i+1][0])
+        x.append(self.row_buffer + 1)
+
+        def dot_forecast(mass_y):
+            A = decimal.Decimal(str(self.my_table.specific_zero_cell("Addition", "A")))
+            mass_y_expanded = copy.deepcopy(mass_y)
+            for i in range(len(mass_y) + 1):
+                if i == 0:
+                    cell_ = decimal.Decimal(str(mass_y[i]))
+                    mid_ = decimal.Decimal(str(sum(mass_y) / len(mass_y)))
+                    mass_y_expanded[i] = cell_ * A + (1 - A) * mid_
+                elif i == len(mass_y):
+                    mass_y_expanded.append(
+                        decimal.Decimal(str(sum(mass_y_expanded) / len(mass_y_expanded))) * A + (1 - A) * decimal.Decimal(str(mass_y_expanded[
+                            len(mass_y) - 1])))
+                else:
+                    mass_y_expanded[i] = decimal.Decimal(str(mass_y[i])) * A + (1 - A) * decimal.Decimal(str(mass_y_expanded[i - 1]))
+            for i in range(len(mass_y_expanded)):
+                mass_y_expanded[i] = float(mass_y_expanded[i])
+            return mass_y_expanded
+
 
         for i in range(len(massive[0])-1):
             chb_item = PySide6.QtWidgets.QCheckBox(str(massive[0][i+1]))
@@ -1180,14 +1186,15 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             y = []
             for j in range(len(massive)-1):
                 y.append(massive[j+1][i+1])
-            # print(x, y, sep="\n")
-            plot = self.tab5.main_plot.plot(x, y)
+
+            y_ex = dot_forecast(y)
+            plot = self.tab5.main_plot.plot(x, y_ex)
             plot.setVisible(False)
             self.tab5.dict_chb_graph[chb_item] = [plot]
 
             count = 0
             texts = []
-            for (xi, yi) in zip(x, y):
+            for (xi, yi) in zip(x, y_ex):
                 text = pyqtgraph.TextItem(str(int(x[count])), anchor=(0, 1))
                 text.setPos(xi, yi)
                 self.tab5.graph_phase.addItem(text)
@@ -1200,7 +1207,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             checkbox.stateChanged.connect(self.update_plots)
 
     def update_plots(self):
-        # self.tab5.graph_phase.clear()
         for checkbox, plot_text in self.tab5.dict_chb_graph.items():
             plot_text[0].setVisible(checkbox.isChecked())
             for i in plot_text[1]:
@@ -1213,7 +1219,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         massive = self.compess_table(self.ui.table_1)
         add_head = ["\u03BC", "\u03B1 с шумом", "\u03B1 без шума", "Оценка"]
         massive[0].extend(add_head)
-        # print(massive[0])
+
         table.setRowCount(len(massive)-1)
         table.setColumnCount(len(massive[0]))
         table.verticalHeader().hide()
@@ -1226,9 +1232,6 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
     def fill_rest_tab6(self):
         self.design_table_tab6(self.tab6.table_rest)
         massive_main = self.compess_table(self.ui.table_1)
-        # zero_row = []
-        # for col in range(len(massive[0]) - 1):
-        #     zero_row.append(massive[1][col + 1])
 
         for row in range(len(massive_main)-1):
             self.tab6.table_rest.setItem(row, 0, PySide6.QtWidgets.QTableWidgetItem(str(int(massive_main[row+1][0]))))

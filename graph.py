@@ -45,8 +45,6 @@ class Graph(object):
             plotWid.addItem(text)
             items_text.append(text)
 
-        print(x_smooth)
-        print(y_smooth)
         self.graph.setData(x_smooth, y_smooth, pen=color)
 
         return items_text
