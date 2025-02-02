@@ -8,7 +8,8 @@ class SixthTabUI(object):
         #QWidget.setEnabled(False)
 
         self.tabwidget_main = PySide6.QtWidgets.QTabWidget()
-        self.layout_main = PySide6.QtWidgets.QHBoxLayout()
+        self.layout_main = PySide6.QtWidgets.QVBoxLayout()
+
         self.layout_main.addWidget(self.tabwidget_main)
 
         self.widget_1_rest = PySide6.QtWidgets.QWidget()
@@ -16,10 +17,23 @@ class SixthTabUI(object):
         self.widget_3_leap = PySide6.QtWidgets.QWidget()
         self.widget_4_cyclic = PySide6.QtWidgets.QWidget()
 
+        self.label_round = PySide6.QtWidgets.QLabel("Степень округления")
+        self.spinbox_round = PySide6.QtWidgets.QSpinBox()
+        self.button_round = PySide6.QtWidgets.QPushButton("Подтвердить")
+
+        self.layout_round = PySide6.QtWidgets.QHBoxLayout()
+        self.layout_round.addWidget(self.label_round)
+        self.layout_round.addWidget(self.spinbox_round)
+        self.layout_round.addWidget(self.button_round)
+
+        self.spinbox_round.setMaximum(20)
+        self.spinbox_round.setMinimum(0)
+        self.spinbox_round.setValue(7)
         self.layout_1_tab = PySide6.QtWidgets.QVBoxLayout()
         self.layout_2_tab = PySide6.QtWidgets.QVBoxLayout()
         self.layout_3_tab = PySide6.QtWidgets.QVBoxLayout()
         self.layout_4_tab = PySide6.QtWidgets.QVBoxLayout()
+        self.layout_main.addLayout(self.layout_round)
 
         self.widget_1_rest.setLayout(self.layout_1_tab)
         self.widget_2_uniform.setLayout(self.layout_2_tab)

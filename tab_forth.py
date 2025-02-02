@@ -71,14 +71,9 @@ class ForthTabUI(object):
         self.label_count_subblock = PySide6.QtWidgets.QLabel("Количество подблоков")
         self.spinbox_count_subblock = PySide6.QtWidgets.QSpinBox()
         self.spinbox_count_subblock.setMinimum(2)
-        self.label_count_cont_dots = PySide6.QtWidgets.QLabel("Количество контрольных точек на одном блоке")
-        self.lineedit_count_cont_dots = PySide6.QtWidgets.QLineEdit()
+
         self.button_tab11_confirm = PySide6.QtWidgets.QPushButton("Подтвердить")
 
-        int_validator = PySide6.QtGui.QIntValidator()
-        self.lineedit_count_cont_dots.setValidator(int_validator)
-
-        self.label_count_cont_dots.setWordWrap(True)
         self.label_count_subblock.setWordWrap(True)
 
         # <<< Гроупбокс ... компановка
@@ -87,8 +82,7 @@ class ForthTabUI(object):
 
         self.layout_count_subblock.addWidget(self.label_count_subblock)
         self.layout_count_subblock.addWidget(self.spinbox_count_subblock)
-        self.layout_count_cont_dots.addWidget(self.label_count_cont_dots)
-        self.layout_count_cont_dots.addWidget(self.lineedit_count_cont_dots)
+
 
         self.layout_settings.addLayout(self.layout_count_subblock)
         self.layout_settings.addLayout(self.layout_count_cont_dots)

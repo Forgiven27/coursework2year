@@ -74,12 +74,14 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             i.toggled.connect(self.check_box_connect_func_tab4)
         self.tab4.button_func_clean.clicked.connect(self.clean_widget_func_tab4)
 
+        self.tab4.combobox_block.currentTextChanged.connect(lambda: self.tab4.groupbox_settings.setEnabled(False) or self.tab4.groupbox_tab1_center.setEnabled(False))
 
 
         self.path = None
         self.my_table = None
         self.row_buffer = 0
         self.round_number = 15
+        self.delta_tab6 = decimal.Decimal("0.002")
         self.blocks = []
         self.first_fill_blocks()
         self.ui.button_del_cycle.clicked.connect(self.row_delete)
@@ -100,6 +102,11 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         self.ui.table_1.verticalHeader().hide()
         self.ui.table_1.setColumnWidth(0, 50)
+
+        self.tab6_spinbox_round_value = self.tab6.spinbox_round.value()
+        self.tab6_quantize = str(pow(10, (-self.tab6_spinbox_round_value)))
+        self.tab6.button_round.clicked.connect(self.update_tab6)
+
 
     def test_functions(self):
         pass
@@ -162,13 +169,13 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             if table.item(i, 3).text().rfind("Не"):
                 count += 1
 
-        if count > table.rowCount() * 0.75 or count < table.rowCount() * 0.2:
+        if count > 1:
             msgbox = PySide6.QtWidgets.QMessageBox()
-            msgbox.setText("Полученные данные сильно не надёжны. Рекомендуется изменить параметры/данные")
+            msgbox.setText("Рекомендуется перейти на следующий уровень декомпозиции")
             msgbox.exec()
         else:
             msgbox = PySide6.QtWidgets.QMessageBox()
-            msgbox.setText("Рекомендуется перейти на следующий уровень")
+            msgbox.setText("Состояние объектов в пределах нормы.\nДальнешая декомпозиция не требуется.")
             msgbox.exec()
 
     def check_box_connect_tab2(self, checked):
@@ -415,7 +422,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.tab3.label_pict.setPixmap(scaled_pixmap2)
 
     def fill_table(self):
-        if self.path != "":
+        if self.path != "" and self.path != None:
             self.my_table = DataBaseClass.DataBase(self.path)
             content_of_table = self.my_table.rows_columns(self.ui.combobox_choose_db.currentText())
             count_of_rows = len(content_of_table)
@@ -467,6 +474,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.fill_table_uni_tab6()
 
         self.fill_table_leap_tab6()
+        self.fill_table_cyclic_tab6()
+
 
         self.fill_tab6_graph()
 
@@ -487,7 +496,18 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.graph_ph(self.tab2.table_phase_coor, self.tab2)
         self.graph_func(self.tab2.table_phase_coor, self.tab2)
         self.checkbox_on()
+    def update_tab6(self):
+        self.tab6_spinbox_round_value = self.tab6.spinbox_round.value()
+        self.tab6_quantize = str(pow(10, (-self.tab6_spinbox_round_value)))
+        print(self.tab6_spinbox_round_value)
+        print(self.tab6_quantize)
+        self.fill_rest_tab6()
+        self.fill_table_uni_tab6()
 
+        self.fill_table_leap_tab6()
+        self.fill_table_cyclic_tab6()
+
+        self.fill_tab6_graph()
     def compess_table(self, table):
         massive = []
         headers = []
@@ -887,7 +907,9 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
                 self.tab4.listbox_selected_dots.addItem(i)
 
     def button_confirm_settings_tab4(self):
-        if self.tab4.lineedit_count_cont_dots.text() != '' and int(self.tab4.lineedit_count_cont_dots.text()) > 1:
+        print("Full - ", len(self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()]))
+        print("Divided - ", len(self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()])/2)
+        if int(self.tab4.spinbox_count_subblock.text()) < len(self.tab4.dict_subblocks[self.tab4.combobox_block.currentText()])/2:
             self.tab4.groupbox_tab1_center.setEnabled(True)
             self.tab4.dict_subblocks_sub.clear()
 
@@ -907,9 +929,9 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
             msg_box = PySide6.QtWidgets.QMessageBox()
             msg_box.setIcon(PySide6.QtWidgets.QMessageBox.Critical)
             msg_box.setWindowTitle("Ошибка")
-            msg_box.setText("Некорректное значение количества точек в подблоке.")
+            msg_box.setText("Некорректное значение количества подблоков.")
             msg_box.setInformativeText(
-                "Для исправления ошибки измените количества точек.")
+                "Для исправления ошибки измените количества блоков.")
             msg_box.setStandardButtons(PySide6.QtWidgets.QMessageBox.Ok)
             msg_box.exec()
 
@@ -1271,7 +1293,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         for i in range(self.tab6.table_rest.rowCount()-1):
             self.tab6.table_rest.setItem(i+1, self.tab6.table_rest.columnCount() - 2,
-                                         PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 7))))
+                                         PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], self.tab6_spinbox_round_value))))
 
         # Оценка
         E_const = float(self.my_table.specific_zero_cell("Addition", "E"))
@@ -1297,12 +1319,12 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.design_table_tab6(self.tab6.table_uni)
         row_zero = []
         massive = self.compess_table(self.ui.table_1)
-        delta = decimal.Decimal("0.0002")
+
         for i in range(len(massive[1])-1):
             row_zero.append(massive[1][i+1])
         for i in range(self.tab6.table_uni.rowCount()):
             for j in range(len(row_zero)):
-                self.tab6.table_uni.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(str(decimal.Decimal(str(row_zero[j])) + delta * i)))
+                self.tab6.table_uni.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(str(decimal.Decimal(str(row_zero[j])) + self.delta_tab6 * i)))
 
         self.fill_table_analyze_tab6(self.tab6.table_uni)
 
@@ -1312,7 +1334,7 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         self.design_table_tab6(self.tab6.table_leap)
         row_zero = []
         massive = self.compess_table(self.ui.table_1)
-        delta = decimal.Decimal("0.0002")
+
         for i in range(len(massive[1]) - 1):
             row_zero.append(massive[1][i + 1])
 
@@ -1324,50 +1346,45 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         for i in range(len(row_zero)):
             cell = decimal.Decimal(self.tab6.table_leap.item(cent_id, i+1).text())
-            self.tab6.table_leap.setItem(cent_id, i + 1, PySide6.QtWidgets.QTableWidgetItem(str(cell + delta * 8)))
+            self.tab6.table_leap.setItem(cent_id, i + 1, PySide6.QtWidgets.QTableWidgetItem(str(cell + self.delta_tab6 * 8)))
         self.fill_table_analyze_tab6(self.tab6.table_leap)
 
-    def fill_cyclic_tab6(self):# Не доделана
+    def fill_table_cyclic_tab6(self):# Не доделана
         self.design_table_tab6(self.tab6.table_cyclic)
         row_zero = []
         massive = self.compess_table(self.ui.table_1)
-        delta = decimal.Decimal("0.0002")
+
         for i in range(len(massive[1]) - 1):
             row_zero.append(massive[1][i + 1])
 
         for j in range(len(row_zero)):
-            self.tab6.table_leap.setItem(0, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+            self.tab6.table_cyclic.setItem(0, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                str(row_zero[j])))
+            self.tab6.table_cyclic.setItem(self.tab6.table_cyclic.rowCount()-1, j + 1, PySide6.QtWidgets.QTableWidgetItem(
                 str(row_zero[j])))
 
         cent_id = int(self.tab6.table_cyclic.rowCount() / 2)
-        if self.tab6.table_cyclic.rowCount() % 2 == 0:
-            for i in range(1, cent_id):
-                rand = decimal.Decimal(str(random.randint(0, 50) * decimal.Decimal("0.00001")))
-                for j in range(len(row_zero)):
-                    cell =  rand + decimal.Decimal(self.tab6.table_uni.item(i-1, j + 1).text())
-                    self.tab6.table_cyclic.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
-                        str(cell)))
-
-
-        elif self.tab6.table_cyclic.rowCount() % 2 == 1:
-            for i in range(1, cent_id):
-                rand = decimal.Decimal(str(random.randint(0, 50) * decimal.Decimal("0.00001")))
-                for j in range(len(row_zero)):
-                    cell = rand + decimal.Decimal(self.tab6.table_uni.item(i - 1, j + 1).text())
-                    self.tab6.table_cyclic.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
-                        str(cell)))
-
-        for i in range(self.tab6.table_cyclic.rowCount()):
+        # if self.tab6.table_cyclic.rowCount() % 2 == 0:
+        for i in range(1, cent_id):
+            rand = decimal.Decimal(str(random.randint(0, 50) * decimal.Decimal("0.00001")))
             for j in range(len(row_zero)):
-                self.tab6.table_leap.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
-                    str(self.tab6.table_uni.item(i, j + 1).text())))
+                cell =  rand + decimal.Decimal(self.tab6.table_cyclic.item(i-1, j + 1).text())
+                self.tab6.table_cyclic.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                    str(cell)))
+        rand = decimal.Decimal(str(random.randint(0, 50) * decimal.Decimal("0.00004")))
+        for j in range(len(row_zero)):
+            cell = rand + decimal.Decimal(self.tab6.table_cyclic.item(cent_id-1, j + 1).text())
+            self.tab6.table_cyclic.setItem(cent_id, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                str(cell)))
 
+        for i in range(cent_id+1, self.tab6.table_cyclic.rowCount()-1):
+            rand = decimal.Decimal(str(random.randint(0, 50) * decimal.Decimal("0.00001")))
+            for j in range(len(row_zero)):
+                cell =  decimal.Decimal(self.tab6.table_cyclic.item(i-1, j + 1).text()) - rand
+                self.tab6.table_cyclic.setItem(i, j + 1, PySide6.QtWidgets.QTableWidgetItem(
+                    str(cell)))
 
-
-        for i in range(len(row_zero)):
-            cell = decimal.Decimal(self.tab6.table_leap.item(cent_id, i + 1).text())
-            self.tab6.table_leap.setItem(cent_id, i + 1, PySide6.QtWidgets.QTableWidgetItem(str(cell + delta * 8)))
-        self.fill_table_analyze_tab6(self.tab6.table_leap)
+        self.fill_table_analyze_tab6(self.tab6.table_cyclic)
 
     def fill_table_analyze_tab6(self, table):
         massive_data = []
@@ -1394,16 +1411,15 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         for i in range(table.rowCount() - 1):
             table.setItem(i + 1, table.columnCount() - 3,
-                                         PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 2))))
+                                         PySide6.QtWidgets.QTableWidgetItem(str(mu_a[1][i])))
         table.resizeColumnToContents(table.columnCount() - 3)
 
         # Без шума
         table.setItem(0, table.columnCount() - 2,
                                      PySide6.QtWidgets.QTableWidgetItem(str(0)))
-
         for i in range(table.rowCount() - 1):
             table.setItem(i + 1, table.columnCount() - 2,
-                                         PySide6.QtWidgets.QTableWidgetItem(str(round(mu_a[1][i], 7))))
+                                         PySide6.QtWidgets.QTableWidgetItem(str(decimal.Decimal(str(mu_a[1][i])).quantize(decimal.Decimal(self.tab6_quantize)))))
 
         # Оценка
         E_const = float(self.my_table.specific_zero_cell("Addition", "E"))
@@ -1411,8 +1427,8 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
         for i in range(table.rowCount()):
             cell_standart = float(self.tab6.table_uni.item(i, 1).text())
             cell = float(table.item(i, 1).text())
-            delta = math.fabs(cell - cell_standart)
-            evaluation.append(delta)
+            delta_calc = math.fabs(cell - cell_standart)
+            evaluation.append(delta_calc)
 
         for i in range(table.rowCount()):
             if evaluation[i] <= E_const:
@@ -1472,15 +1488,41 @@ class MainApp(PySide6.QtWidgets.QMainWindow, MainWindow_UI):
 
         uni_w = graph.Graph(self.tab6.plot_widget_uni_w_noise.plot())
         uni_w.setDots(x_uni, y_uni_w, "w", self.tab6.plot_widget_uni_w_noise, headers)
+
         uni_wo = graph.Graph(self.tab6.plot_widget_uni_wo_noise.plot())
         uni_wo.setDots(x_uni, y_uni_wo, "w", self.tab6.plot_widget_uni_wo_noise, headers)
 
-        # uni_w_noise = graph.Graph(self.tab6.plot_widget_rest_w_noise)
-        # uni_wo_noise = graph.Graph(self.tab6.plot_widget_rest_wo_noise)
-        #
-        #
-        # leap_w_noise = graph.Graph(self.tab6.plot_widget_rest_w_noise)
-        # leap_wo_noise = graph.Graph(self.tab6.plot_widget_rest_wo_noise)
+        # tab leap
+        x_leap = []
+        y_leap_w = []
+        y_leap_wo = []
+
+        for i in range(row_count):
+            x_leap.append(float(self.tab6.table_leap.item(i, col_mu).text()))
+            y_leap_w.append(float(self.tab6.table_leap.item(i, col_a_w).text()))
+            y_leap_wo.append(float(self.tab6.table_leap.item(i, col_a_wo).text()))
+
+        leap_w = graph.Graph(self.tab6.plot_widget_leap_w_noise.plot())
+        leap_w.setDots(x_leap, y_leap_w, "w", self.tab6.plot_widget_leap_w_noise, headers)
+
+        leap_wo = graph.Graph(self.tab6.plot_widget_leap_wo_noise.plot())
+        leap_wo.setDots(x_leap, y_leap_wo, "w", self.tab6.plot_widget_leap_wo_noise, headers)
+
+        # tab cyclic
+        x_cyclic = []
+        y_cyclic_w = []
+        y_cyclic_wo = []
+
+        for i in range(row_count):
+            x_cyclic.append(float(self.tab6.table_cyclic.item(i, col_mu).text()))
+            y_cyclic_w.append(float(self.tab6.table_cyclic.item(i, col_a_w).text()))
+            y_cyclic_wo.append(float(self.tab6.table_cyclic.item(i, col_a_wo).text()))
+
+        cyclic_w = graph.Graph(self.tab6.plot_widget_cyclic_w_noise.plot())
+        cyclic_w.setDots(x_cyclic, y_cyclic_w, "w", self.tab6.plot_widget_cyclic_w_noise, headers)
+
+        cyclic_wo = graph.Graph(self.tab6.plot_widget_cyclic_wo_noise.plot())
+        cyclic_wo.setDots(x_cyclic, y_cyclic_wo, "w", self.tab6.plot_widget_cyclic_wo_noise, headers)
 
 
 if __name__ == "__main__":

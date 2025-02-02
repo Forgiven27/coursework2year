@@ -48,3 +48,7 @@ class Graph(object):
         self.graph.setData(x_smooth, y_smooth, pen=color)
 
         return items_text
+
+    def lockRange(self, x1, x2, y1, y2):
+        self.graph.setXRange(x1, x2, padding=0)
+        self.graph.setYRange(y1, y2, padding=0)
